@@ -25,8 +25,8 @@ jobs:
         run: |
           go build -ldflags "-X main.clientID=${{ secrets.CLIENT_ID }} -X main.clientSecret=${{ secrets.CLIENT_SECRET }}"
 
-      - name: Upload binary as release asset
-        uses: actions/upload-artifact@v2
-        with:
-          name: tickli-release
-          path: ./tickli
+  #    - name: Upload binary as release asset
+   #     uses: actions/upload-artifact@v2
+    #    with:
+     #     name: tickli-release
+      #    path: ./tickli
