@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/joho/godotenv"
 	"net/http"
+	"os"
 	"os/exec"
 	"runtime"
 
@@ -19,21 +21,30 @@ var (
 
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Initialize tickli with your TickTick credentials",
+	Short: "Initialize tickli and obtain an access token",
+	Long: `Initialize tickli by performing OAuth authentication with TickTick.
+This will open your browser for authentication and store the access token securely.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		cfg, err := config.Load()
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to load config")
+
+		if token, err := config.LoadToken(); err != nil {
+			log.Fatal().Err(err).Msg("failed to check existing token")
+		} else if token != "" {
+			log.Fatal().Msg("tickli is already initialized. Used 'tickli reset' to reinitialize")
 		}
 
-		if clientID != "" {
-			cfg.ClientID = clientID
-		}
-		if clientSecret != "" {
-			cfg.ClientSecret = clientSecret
+		if err := godotenv.Load(); err == nil {
+			log.Info().Msg("Loading TickTick credentials from .env")
+
+			clientID = os.Getenv("TICKTICK_CLIENT_ID")
+			clientSecret = os.Getenv("TICKTICK_CLIENT_SECRET")
 		}
 
-		// Start local server for OAuth callback
+		// Verify credentials are available
+		if clientID == "" || clientSecret == "" {
+			log.Fatal().Msg("Missing TickTick credentials. Please provide them via environment variables or build flags")
+		}
+
+		// Start OAuth flow
 		server := &http.Server{Addr: ":8080"}
 		code := make(chan string)
 
@@ -43,50 +54,41 @@ var initCmd = &cobra.Command{
 			go server.Close()
 		})
 
-		// Open browser for authorization
-		authURL := api.GetAuthURL(cfg.ClientID)
-		openBrowser(authURL)
+		authURL := api.GetAuthURL(clientID)
+		if err := openBrowser(authURL); err != nil {
+			log.Fatal().Err(err).Msg("Failed to open browser")
+		}
 
 		log.Info().Msg("Waiting for authorization...")
 		go server.ListenAndServe()
 
 		// Get access token
 		authCode := <-code
-		token, err := api.GetAccessToken(cfg.ClientID, cfg.ClientSecret, authCode)
+		token, err := api.GetAccessToken(clientID, clientSecret, authCode)
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to get access token")
 		}
 
-		cfg.AccessToken = token
-		if err := config.Save(cfg); err != nil {
-			log.Fatal().Err(err).Msg("Failed to save config")
+		if err := config.SaveToken(token); err != nil {
+			log.Fatal().Err(err).Msg("Failed to save access token")
 		}
 
 		log.Info().Msg("Successfully initialized tickli!")
 	},
 }
 
-func init() {
-	rootCmd.AddCommand(initCmd)
-	initCmd.Flags().StringVar(&clientID, "client-id", "", "TickTick OAuth client ID")
-	initCmd.Flags().StringVar(&clientSecret, "client-secret", "", "TickTick OAuth client secret")
-}
-
-func openBrowser(url string) {
-	var err error
-
+func openBrowser(url string) (err error) {
 	switch runtime.GOOS {
 	case "linux":
 		err = exec.Command("xdg-open", url).Start()
-	case "windows":
-		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
 	case "darwin":
 		err = exec.Command("open", url).Start()
 	default:
 		err = fmt.Errorf("unsupported platform")
 	}
+	return err
+}
 
-	if err != nil {
-		log.Error().Err(err).Msg("Failed to open browser")
-	}
+func init() {
+	rootCmd.AddCommand(initCmd)
 }

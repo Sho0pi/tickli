@@ -14,14 +14,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Go
         uses: actions/setup-go@v5
 
       - name: Build binary with credentials
         run: |
-          go build -ldflags "-X main.clientID=${{ secrets.CLIENT_ID }} -X main.clientSecret=${{ secrets.CLIENT_SECRET }}"
+          go build -ldflags="-X 'github.com/sho0pi/tickli/cmd.clientID=AAA' -X 'github.com/sho0pi/tickli/cmd.clientSecret=AAA'" -o tickli
 
   #    - name: Upload binary as release asset
    #     uses: actions/upload-artifact@v2

@@ -9,9 +9,6 @@ import (
 )
 
 type Config struct {
-	ClientID         string `yaml:"client_id"`
-	ClientSecret     string `yaml:"client_secret"`
-	AccessToken      string `yaml:"access_token"`
 	DefaultProjectID string `yaml:"default_project_id"`
 }
 
@@ -58,4 +55,55 @@ func expandPath(path string) string {
 		path = filepath.Join(home, path[1:])
 	}
 	return path
+}
+
+//TODO: setup the configuration
+
+func getTokenPath() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(home, ".local/share/tickli/token"), nil
+}
+
+func LoadToken() (string, error) {
+	path, err := getTokenPath()
+	if err != nil {
+		return "", err
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", nil
+		}
+		return "", err
+	}
+
+	return string(data), nil
+}
+
+func SaveToken(token string) error {
+	path, err := getTokenPath()
+	if err != nil {
+		return err
+	}
+
+	if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
+		return errors.Wrap(err, "creating token directory")
+	}
+
+	return os.WriteFile(path, []byte(token), 0600)
+}
+
+func DeleteToken() error {
+	path, err := getTokenPath()
+	if err != nil {
+		return err
+	}
+	if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	return nil
 }
