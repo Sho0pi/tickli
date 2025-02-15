@@ -8,16 +8,6 @@ import (
 )
 
 func GetProjectDescription(project api.Project) string {
-	var kindEmoji string
-	switch project.Kind {
-	case "TASK":
-		kindEmoji = "📝"
-	case "NOTE":
-		kindEmoji = "🗒️"
-	default:
-		kindEmoji = "🔧"
-	}
-
 	var projectStatus string
 	if project.Closed {
 		projectStatus = "Closed"
@@ -25,26 +15,23 @@ func GetProjectDescription(project api.Project) string {
 		projectStatus = "Open"
 	}
 
-	projectColor := color.HEX(project.Color, true)
-	if project.Color == "" {
-		projectColor = color.HEX("#000000", true)
-	}
-	projectLine := projectColor.Sprint("----------------------")
+	projectLine := project.GetColor().Sprint("■■■■■■■■■■■■■■■■■■■■■■■■")
 
 	description := fmt.Sprintf(`
 Project Details:
 
 %s
-Name: %s - %s
+Name: %s
 ID: %s
+Type: %s
 Status: %s
 Group: %s
 
 Tasks:`,
 		projectLine,
-		kindEmoji,
 		project.Name,
 		project.ID,
+		project.GetKind(),
 		projectStatus,
 		project.GroupID,
 	)
@@ -90,7 +77,7 @@ Tasks:`,
 	return description
 }
 
-func FuzzySelectProject(projects []api.Project, query string) (api.Project, error) {
+func FuzzySelectProject(projects []api.Project, query string) (*api.Project, error) {
 	idx, err := fuzzyfinder.Find(
 		projects,
 		func(i int) string {
@@ -109,10 +96,10 @@ func FuzzySelectProject(projects []api.Project, query string) (api.Project, erro
 		fuzzyfinder.WithPromptString("Search Project: "),
 	)
 	if err != nil {
-		return api.Project{}, err
+		return &api.Project{}, err
 	}
 
-	return projects[idx], nil
+	return &projects[idx], nil
 }
 
 func FuzzySelectTask(tasks []api.Task, projectColorHEX string, query string) (api.Task, error) {

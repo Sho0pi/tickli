@@ -81,16 +81,6 @@ func (c *Client) ListTasks(projectID string) ([]Task, error) {
 		Tasks []Task `json:"tasks"`
 	}
 	resp, err := c.http.R().
-		Get(fmt.Sprintf("/project/%s/data", projectID))
-
-	if err != nil {
-		return nil, errors.Wrap(err, "listing tasks")
-	}
-
-	// Print the raw response body
-	fmt.Println("Raw Response:", resp.String())
-
-	resp, err = c.http.R().
 		SetResult(&projectData).
 		Get(fmt.Sprintf("/project/%s/data", projectID))
 

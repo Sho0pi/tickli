@@ -1,6 +1,10 @@
 package api
 
-import "time"
+import (
+	"fmt"
+	"github.com/gookit/color"
+	"time"
+)
 
 // TODO: fix time problem
 type Project struct {
@@ -31,16 +35,16 @@ type Task struct {
 	ProjectID     string          `json:"projectId"`
 	Title         string          `json:"title"`
 	IsAllDay      bool            `json:"isAllDay"`
-	CompletedTime *time.Time      `json:"completedTime"`
+	CompletedTime *string         `json:"completedTime"`
 	Content       string          `json:"content"`
 	Desc          string          `json:"desc"`
-	DueDate       *time.Time      `json:"dueDate"`
+	DueDate       *string         `json:"dueDate"`
 	Items         []ChecklistItem `json:"items"`
 	Priority      int             `json:"priority"`
 	Reminders     []string        `json:"reminders"`
 	RepeatFlag    string          `json:"repeatFlag"`
 	SortOrder     int64           `json:"sortOrder"`
-	StartDate     *time.Time      `json:"startDate"`
+	StartDate     *string         `json:"startDate"`
 	Status        int             `json:"status"`
 	TimeZone      string          `json:"timeZone"`
 }
@@ -56,4 +60,44 @@ type ProjectData struct {
 	Project Project  `json:"project"`
 	Tasks   []Task   `json:"tasks"`
 	Columns []Column `json:"columns"`
+}
+
+const DefaultColor = "#3694FE"
+
+func (p *Project) GetColor() color.RGBColor {
+	if p.Color == "" {
+		return color.HEX(DefaultColor)
+	}
+	return color.HEX(p.Color)
+}
+
+func (p *Project) GetKind() string {
+	var projectKind string
+	switch p.Kind {
+	case "TASK":
+		projectKind = "📝Task"
+	case "NOTE":
+		projectKind = "📖Note"
+	case "INBOX":
+		projectKind = "📥Inbox"
+	default:
+		projectKind = "🔧Unknown"
+	}
+	return projectKind
+}
+
+func (p *Project) String() string {
+	return fmt.Sprintf(
+		"ID: %s\nName: %s\nColor: %s\nSortOrder: %d\nClosed: %t\nGroupID: %s\nViewMode: %s\nPermission: %s\nKind: %s",
+		p.ID,
+		p.Name,
+		p.Color,
+		//p.Color.Sprint("■■■■"), // Use the color to print a sample block
+		p.SortOrder,
+		p.Closed,
+		p.GroupID,
+		p.ViewMode,
+		p.Permission,
+		p.Kind,
+	)
 }

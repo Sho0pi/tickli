@@ -1,12 +1,12 @@
 package cmd
 
 import (
-	"fmt"
 	"github.com/rs/zerolog/log"
 	"github.com/sho0pi/tickli/internal/api"
 	"github.com/sho0pi/tickli/internal/config"
 	"github.com/sho0pi/tickli/internal/utils"
 	"github.com/spf13/cobra"
+	"strings"
 )
 
 const (
@@ -81,28 +81,58 @@ Examples:
 	Run: func(cmd *cobra.Command, args []string) {
 		var projectName string
 		if len(args) > 0 {
-			projectName = args[0]
+			projectName = strings.TrimSpace(args[0])
 		}
-
 		projects, err := api.GetProjects()
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to fetch projects")
 		}
 
-		selectedProject, err := utils.FuzzySelectProject(projects, projectName)
-		if err != nil {
-			log.Fatal().Err(err).Msg("failed to select project")
+		var selectedProject *api.Project
+
+		if projectName == "" {
+			selectedProject, err = utils.FuzzySelectProject(projects, projectName)
+			if err != nil {
+				log.Fatal().Err(err).Msg("failed to select project")
+			}
+		} else {
+			matches := findProjectByName(projects, projectName)
+			switch len(matches) {
+			case 0:
+				log.Fatal().Str("project_name", projectName).Msg("Project not found")
+			case 1:
+				selectedProject = &matches[0]
+			default:
+				selectedProject, err = utils.FuzzySelectProject(matches, projectName)
+				if err != nil {
+					log.Fatal().Err(err).Msg("failed to select project")
+				}
+			}
 		}
 
-		fmt.Println(selectedProject)
-		fmt.Println(projectName)
-		//matchingProjects := []api.Project{}
-		//for _, project := range projects {
-		//	if project.Name == projectName {
-		//	}
-		//}
+		cfg, err := config.Load()
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to load config")
+		}
 
+		cfg.DefaultProjectID = selectedProject.ID
+		if err := config.Save(cfg); err != nil {
+			log.Fatal().Err(err).Msg("Failed to save config")
+		}
+
+		log.Info().Str("project_id", cfg.DefaultProjectID).Msg("Default project ID updated")
 	},
+}
+
+func findProjectByName(projects []api.Project, projectName string) []api.Project {
+	var matched []api.Project
+	nameLower := strings.ToLower(projectName)
+	for _, p := range projects {
+		if strings.Contains(strings.ToLower(p.Name), nameLower) {
+			matched = append(matched, p)
+		}
+	}
+	return matched
 }
 
 func init() {

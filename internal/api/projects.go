@@ -5,6 +5,18 @@ import (
 	"github.com/sho0pi/tickli/internal/config"
 )
 
+var InboxProject = Project{
+	ID:         "inbox",
+	Name:       "inbox",
+	Color:      DefaultColor,
+	SortOrder:  0,
+	Closed:     false,
+	GroupID:    "",
+	ViewMode:   "",
+	Permission: "",
+	Kind:       "INBOX",
+}
+
 func GetProjects() ([]Project, error) {
 	token, err := config.LoadToken()
 	if err != nil {
@@ -16,6 +28,9 @@ func GetProjects() ([]Project, error) {
 	if err != nil {
 		return nil, fmt.Errorf("falied to list projects: %w", err)
 	}
+
+	// Adds the default InboxProject - not appears by default
+	projects = append(projects, InboxProject)
 
 	return projects, nil
 }
