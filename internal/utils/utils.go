@@ -15,7 +15,7 @@ func GetProjectDescription(project api.Project) string {
 		projectStatus = "Open"
 	}
 
-	projectLine := project.GetColor().Sprint("■■■■■■■■■■■■■■■■■■■■■■■■")
+	projectLine := project.ColorSprint("■■■■■■■■■■■■■■■■■■■■■■■■")
 
 	description := fmt.Sprintf(`
 Project Details:
@@ -31,7 +31,7 @@ Tasks:`,
 		projectLine,
 		project.Name,
 		project.ID,
-		project.GetKind(),
+		project.Kind.GetEmoji(),
 		projectStatus,
 		project.GroupID,
 	)
@@ -40,16 +40,6 @@ Tasks:`,
 }
 
 func GetTaskDescription(task api.Task, projectColorHEX string) string {
-	var statusEmoji string
-	switch task.Status {
-	case 0:
-		statusEmoji = color.BgHiWhite.Sprint("[ ]")
-	case 2:
-		statusEmoji = color.BgHiGreen.Sprint("[✔]")
-	default:
-		statusEmoji = "[>>]"
-	}
-
 	projectColor := color.HEX(projectColorHEX, true)
 	if projectColorHEX == "" {
 		projectColor = color.HEX("#000000", true)
@@ -63,15 +53,25 @@ Task Details:
 %s
 Desc: %s 
 Content: %s
+Priority: %s
 Group: %s
 
+Time: 
+StartDate: %s
+DueDate: %s
+CompletedTime: %s
+
 Tasks:`,
-		statusEmoji,
+		task.Status.String(),
 		projectLine,
 		task.Title,
 		task.Desc,
 		task.Content,
+		task.Priority.String(),
 		task.ProjectID,
+		task.StartDate.String(),
+		task.DueDate.String(),
+		task.CompletedTime.String(),
 	)
 
 	return description

@@ -5,16 +5,14 @@ import (
 	"github.com/sho0pi/tickli/internal/config"
 )
 
+// InboxProject the Inbox project representation (cause is not returned by the api)
 var InboxProject = Project{
-	ID:         "inbox",
-	Name:       "inbox",
-	Color:      DefaultColor,
-	SortOrder:  0,
-	Closed:     false,
-	GroupID:    "",
-	ViewMode:   "",
-	Permission: "",
-	Kind:       "INBOX",
+	ID:        "inbox",
+	Name:      "inbox",
+	Color:     DefaultColor,
+	SortOrder: 0,
+	Closed:    false,
+	Kind:      KindInbox,
 }
 
 func GetProjects() ([]Project, error) {
