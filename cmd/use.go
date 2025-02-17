@@ -1,143 +1,132 @@
 package cmd
 
 import (
+	"fmt"
+	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 	"github.com/sho0pi/tickli/internal/api"
 	"github.com/sho0pi/tickli/internal/config"
+	"github.com/sho0pi/tickli/internal/types"
 	"github.com/sho0pi/tickli/internal/utils"
 	"github.com/spf13/cobra"
 	"strings"
 )
 
-const (
-	inboxID   = "inbox"
-	inboxName = "inbox"
+var (
+	projectName string
+	projectID   string
 )
 
-var noValidate bool
-
-var useIDCmd = &cobra.Command{
-	Use:   "use-id <project-id>",
-	Short: "Switch to a project using its ID",
-	Long: `Switch to a project using its exact ID.
-This command requires an exact match and will fail if the ID doesn't exist.
-
-Example:
-  tickli use-id inbox   # Switch to inbox
-  tickli use-id abc123   # Switch using exact ID match
-  tickli use-id abc123 --no-noValidate   # Switch without validation`,
-	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		projectID := args[0]
-
-		// Validate if the flag is set
-		if !noValidate && projectID != inboxID {
-			projects, err := api.GetProjects()
-			if err != nil {
-				log.Fatal().Err(err).Msg("failed to fetch projects")
-			}
-
-			// Check if the project ID exists
-			found := false
-			for _, project := range projects {
-				if project.ID == projectID {
-					found = true
-					break
-				}
-			}
-
-			if !found {
-				log.Fatal().Str("project_id", projectID).Msg("Project ID not found")
-			}
-		}
-		// Save the project ID in config
-		cfg, err := config.Load()
-		if err != nil {
-			log.Fatal().Err(err).Msg("failed to load config")
-		}
-
-		cfg.DefaultProjectID = projectID
-		if err := config.Save(cfg); err != nil {
-			log.Fatal().Err(err).Msg("failed to save config")
-		}
-
-		log.Info().Str("project_id", cfg.DefaultProjectID).Msg("Switched to project")
-
-	},
+type projectSelector struct {
+	projects []types.Project
 }
 
-var useCmd = &cobra.Command{
-	Use:   "use [project-name]",
-	Short: "Switch to a project using name or interactive selection",
-	Long: `Switch to a project using its name or interactive selection.
-If no name is provided, opens an interactive fuzzy finder.
-Special case: 'use inbox' switches to the inbox project.
-
-Examples:
-  tickli use              # Interactive fuzzy finder
-  tickli use inbox       # Switch to inbox
-  tickli use "Work"      # Search by name`,
-	Args: cobra.MaximumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		var projectName string
-		if len(args) > 0 {
-			projectName = strings.TrimSpace(args[0])
-		}
-		projects, err := api.GetProjects()
-		if err != nil {
-			log.Fatal().Err(err).Msg("failed to fetch projects")
-		}
-
-		var selectedProject *api.Project
-
-		if projectName == "" {
-			selectedProject, err = utils.FuzzySelectProject(projects, projectName)
-			if err != nil {
-				log.Fatal().Err(err).Msg("failed to select project")
-			}
-		} else {
-			matches := findProjectByName(projects, projectName)
-			switch len(matches) {
-			case 0:
-				log.Fatal().Str("project_name", projectName).Msg("Project not found")
-			case 1:
-				selectedProject = &matches[0]
-			default:
-				selectedProject, err = utils.FuzzySelectProject(matches, projectName)
-				if err != nil {
-					log.Fatal().Err(err).Msg("failed to select project")
-				}
-			}
-		}
-
-		cfg, err := config.Load()
-		if err != nil {
-			log.Fatal().Err(err).Msg("Failed to load config")
-		}
-
-		cfg.DefaultProjectID = selectedProject.ID
-		if err := config.Save(cfg); err != nil {
-			log.Fatal().Err(err).Msg("Failed to save config")
-		}
-
-		log.Info().Str("project_id", cfg.DefaultProjectID).Msg("Default project ID updated")
-	},
+func newProjectSelector(projects []types.Project) *projectSelector {
+	return &projectSelector{projects: projects}
 }
 
-func findProjectByName(projects []api.Project, projectName string) []api.Project {
-	var matched []api.Project
-	nameLower := strings.ToLower(projectName)
-	for _, p := range projects {
+func (ps *projectSelector) byID(id string) (*types.Project, error) {
+	for _, p := range ps.projects {
+		if p.ID == id {
+			return &p, nil
+		}
+	}
+	return nil, fmt.Errorf("no project found with ID '%s'", id)
+}
+
+func (ps *projectSelector) byName(name string) ([]types.Project, error) {
+	var matched []types.Project
+	nameLower := strings.ToLower(name)
+	for _, p := range ps.projects {
 		if strings.Contains(strings.ToLower(p.Name), nameLower) {
 			matched = append(matched, p)
 		}
 	}
-	return matched
+	if len(matched) == 0 {
+		return nil, fmt.Errorf("no project found with name '%s'", name)
+	}
+	return matched, nil
+}
+
+var useCmd = &cobra.Command{
+	Use:   "use [-n name | -i id]",
+	Short: "Switch active project context",
+	Long: `Switch the active project context for subsequent commands.
+
+This command allows you to change your active project in three ways:
+1. Interactive selection (no arguments)
+2. Direct selection by project name
+3. Direct selection by project ID
+
+The selected project becomes the default context for future commands.`,
+	Example: `  # Interactive project selection
+  tickli use
+
+  # Switch by partial or full project name
+  tickli use -n "My Project"
+
+  # Switch by project ID
+  tickli use -i abc123`,
+	Args: cobra.MaximumNArgs(0),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		// first get all the available projects.
+		projects, err := api.GetProjects()
+		if err != nil {
+			return errors.Wrap(err, "failed to get projects")
+		}
+
+		selector := newProjectSelector(projects)
+		var selectedProject types.Project
+
+		switch {
+		case projectID != "":
+			project, err := selector.byID(projectID)
+			if err != nil {
+				return err
+			}
+			selectedProject = *project
+		case projectName != "":
+			matches, err := selector.byName(projectName)
+			if err != nil {
+				return err
+			}
+			if len(matches) == 1 {
+				selectedProject = matches[0]
+			} else {
+				project, err := utils.FuzzySelectProject(matches, projectName)
+				if err != nil {
+					return errors.Wrap(err, "failed to select project")
+				}
+				selectedProject = *project
+			}
+		default:
+			project, err := utils.FuzzySelectProject(projects, "")
+			if err != nil {
+				return errors.Wrap(err, "failed to select project")
+			}
+			selectedProject = *project
+		}
+
+		cfg, err := config.Load()
+		if err != nil {
+			return errors.Wrap(err, "failed to load config")
+		}
+
+		cfg.DefaultProjectID = selectedProject.ID
+		if err := config.Save(cfg); err != nil {
+			return errors.Wrap(err, "failed to save config")
+		}
+
+		log.Info().Str("project_id", cfg.DefaultProjectID).Msg("Default project ID updated")
+		return nil
+	},
 }
 
 func init() {
-	useIDCmd.Flags().BoolVar(&noValidate, "no-validate", false, "Skip project ID validation before switching")
+	useCmd.Flags().StringVarP(&projectName, "name", "n", "", "Name of the project to switch to")
+	useCmd.Flags().StringVarP(&projectID, "id", "i", "", "ID of the project to switch to")
+	useCmd.MarkFlagsMutuallyExclusive("name", "id")
 
-	rootCmd.AddCommand(useIDCmd)
+	rootCmd.AddCommand()
 	rootCmd.AddCommand(useCmd)
 }

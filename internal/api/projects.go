@@ -3,19 +3,10 @@ package api
 import (
 	"fmt"
 	"github.com/sho0pi/tickli/internal/config"
+	"github.com/sho0pi/tickli/internal/types"
 )
 
-// InboxProject the Inbox project representation (cause is not returned by the api)
-var InboxProject = Project{
-	ID:        "inbox",
-	Name:      "inbox",
-	Color:     DefaultColor,
-	SortOrder: 0,
-	Closed:    false,
-	Kind:      KindInbox,
-}
-
-func GetProjects() ([]Project, error) {
+func GetProjects() ([]types.Project, error) {
 	token, err := config.LoadToken()
 	if err != nil {
 		return nil, fmt.Errorf("falied to load token: %w", err)
@@ -28,12 +19,12 @@ func GetProjects() ([]Project, error) {
 	}
 
 	// Adds the default InboxProject - not appears by default
-	projects = append(projects, InboxProject)
+	projects = append(projects, types.InboxProject)
 
 	return projects, nil
 }
 
-func GetTasks(projectID string) ([]Task, error) {
+func GetTasks(projectID string) ([]types.Task, error) {
 	token, err := config.LoadToken()
 	if err != nil {
 		return nil, fmt.Errorf("falied to load token: %w", err)

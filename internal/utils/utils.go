@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"github.com/gookit/color"
 	"github.com/ktr0731/go-fuzzyfinder"
-	"github.com/sho0pi/tickli/internal/api"
+	"github.com/sho0pi/tickli/internal/types"
 )
 
-func GetProjectDescription(project api.Project) string {
+func GetProjectDescription(project types.Project) string {
 	var projectStatus string
 	if project.Closed {
 		projectStatus = "Closed"
@@ -15,7 +15,7 @@ func GetProjectDescription(project api.Project) string {
 		projectStatus = "Open"
 	}
 
-	projectLine := project.ColorSprint("■■■■■■■■■■■■■■■■■■■■■■■■")
+	projectLine := project.Color.Sprint("■■■■■■■■■■■■■■■■■■■■■■■■", project.Color)
 
 	description := fmt.Sprintf(`
 Project Details:
@@ -23,7 +23,7 @@ Project Details:
 %s
 Name: %s
 ID: %s
-Type: %s
+Type: %s 
 Status: %s
 Group: %s
 
@@ -31,7 +31,7 @@ Tasks:`,
 		projectLine,
 		project.Name,
 		project.ID,
-		project.Kind.GetEmoji(),
+		project.Kind,
 		projectStatus,
 		project.GroupID,
 	)
@@ -39,7 +39,7 @@ Tasks:`,
 	return description
 }
 
-func GetTaskDescription(task api.Task, projectColorHEX string) string {
+func GetTaskDescription(task types.Task, projectColorHEX string) string {
 	projectColor := color.HEX(projectColorHEX, true)
 	if projectColorHEX == "" {
 		projectColor = color.HEX("#000000", true)
@@ -62,22 +62,22 @@ DueDate: %s
 CompletedTime: %s
 
 Tasks:`,
-		task.Status.String(),
+		task.Status,
 		projectLine,
 		task.Title,
 		task.Desc,
 		task.Content,
 		task.Priority.String(),
 		task.ProjectID,
-		task.StartDate.String(),
-		task.DueDate.String(),
+		task.StartDate.Humanize(),
+		task.DueDate,
 		task.CompletedTime.String(),
 	)
 
 	return description
 }
 
-func FuzzySelectProject(projects []api.Project, query string) (*api.Project, error) {
+func FuzzySelectProject(projects []types.Project, query string) (*types.Project, error) {
 	idx, err := fuzzyfinder.Find(
 		projects,
 		func(i int) string {
@@ -96,13 +96,13 @@ func FuzzySelectProject(projects []api.Project, query string) (*api.Project, err
 		fuzzyfinder.WithPromptString("Search Project: "),
 	)
 	if err != nil {
-		return &api.Project{}, err
+		return &types.Project{}, err
 	}
 
 	return &projects[idx], nil
 }
 
-func FuzzySelectTask(tasks []api.Task, projectColorHEX string, query string) (api.Task, error) {
+func FuzzySelectTask(tasks []types.Task, projectColorHEX string, query string) (*types.Task, error) {
 	idx, err := fuzzyfinder.Find(
 		tasks,
 		func(i int) string {
@@ -121,8 +121,8 @@ func FuzzySelectTask(tasks []api.Task, projectColorHEX string, query string) (ap
 		fuzzyfinder.WithPromptString("Search Project: "),
 	)
 	if err != nil {
-		return api.Task{}, err
+		return &types.Task{}, err
 	}
 
-	return tasks[idx], nil
+	return &tasks[idx], nil
 }
