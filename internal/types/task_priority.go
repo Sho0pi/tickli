@@ -2,7 +2,9 @@ package types
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gookit/color"
+	"strings"
 )
 
 type TaskPriority int
@@ -20,6 +22,13 @@ var (
 	MediumPriorityColor = color.HEX("#FAA80B").C256()
 	HighPriorityColor   = color.HEX("#D52B24").C256()
 )
+
+var priorityMap = map[string]TaskPriority{
+	"none":   PriorityNone,
+	"low":    PriorityLow,
+	"medium": PriorityMedium,
+	"high":   PriorityHigh,
+}
 
 func (p *TaskPriority) UnmarshalJSON(data []byte) error {
 	var priority int
@@ -53,4 +62,18 @@ func (p TaskPriority) String() string {
 	}
 
 	return flag
+}
+
+func (p *TaskPriority) Set(value string) error {
+	priority, ok := priorityMap[strings.ToLower(value)]
+	if !ok {
+		return fmt.Errorf("invalid priority: %s", value)
+	}
+
+	*p = priority
+	return nil
+}
+
+func (p *TaskPriority) Type() string {
+	return "TaskPriority"
 }

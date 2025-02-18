@@ -5,16 +5,16 @@ type Task struct {
 	ProjectID     string          `json:"projectId"`
 	Title         string          `json:"title"`
 	IsAllDay      bool            `json:"isAllDay"`
-	CompletedTime TickTickTime    `json:"completedTime"`
+	CompletedTime TickTickTime    `json:"completedTime,omitzero"`
 	Content       string          `json:"content"`
 	Desc          string          `json:"desc"`
-	DueDate       TickTickTime    `json:"dueDate"`
+	DueDate       TickTickTime    `json:"dueDate,omitzero"`
 	Items         []ChecklistItem `json:"items"`
 	Priority      TaskPriority    `json:"priority"`
 	Reminders     []string        `json:"reminders"`
 	RepeatFlag    string          `json:"repeatFlag"`
 	SortOrder     int64           `json:"sortOrder"`
-	StartDate     TickTickTime    `json:"startDate"`
+	StartDate     TickTickTime    `json:"startDate,omitzero"`
 	Status        TaskStatus      `json:"status"`
 	TimeZone      string          `json:"timeZone"`
 	Tags          []string        `json:"tags"`

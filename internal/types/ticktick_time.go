@@ -12,7 +12,6 @@ type TickTickTime time.Time
 func (t *TickTickTime) UnmarshalJSON(data []byte) error {
 	var timeStr string
 	if err := json.Unmarshal(data, &timeStr); err != nil {
-		fmt.Println(string(data))
 		return err
 	}
 

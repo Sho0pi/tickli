@@ -74,6 +74,9 @@ func (c *Client) ListProjects() ([]types.Project, error) {
 		return nil, fmt.Errorf("failed to list projects: %s", resp.String())
 	}
 
+	// Adds the default InboxProject - not appears by default
+	projects = append(projects, types.InboxProject)
+
 	return projects, nil
 }
 

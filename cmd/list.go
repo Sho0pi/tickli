@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/rs/zerolog/log"
-	"github.com/sho0pi/tickli/internal/api"
 	"github.com/sho0pi/tickli/internal/config"
 	"github.com/sho0pi/tickli/internal/utils"
 	"github.com/spf13/cobra"
@@ -27,7 +26,7 @@ var listCmd = &cobra.Command{
 			projectID = cfg.DefaultProjectID
 		}
 
-		tasks, err := api.GetTasks(projectID)
+		tasks, err := TickliClient.ListTasks(projectID)
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to get tasks")
 		}
@@ -39,21 +38,6 @@ var listCmd = &cobra.Command{
 
 		fmt.Println(task)
 	},
-}
-
-func getPriorityString(priority int) string {
-	switch priority {
-	case 0:
-		return "None"
-	case 1:
-		return "Low"
-	case 3:
-		return "Medium"
-	case 5:
-		return "High"
-	default:
-		return "Unknown"
-	}
 }
 
 func init() {

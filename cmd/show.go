@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"github.com/rs/zerolog/log"
-	"github.com/sho0pi/tickli/internal/api"
 	"github.com/sho0pi/tickli/internal/utils"
 	"github.com/spf13/cobra"
 )
@@ -14,7 +13,7 @@ var showCmd = &cobra.Command{
 	Long: `Show all available projects without setting any of them as the default. 
 Lists each project with its details.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		projects, err := api.GetProjects()
+		projects, err := TickliClient.ListProjects()
 		if err != nil {
 			log.Fatal().Err(err).Msg("failed to fetch projects")
 		}

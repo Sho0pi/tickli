@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
-	"github.com/sho0pi/tickli/internal/api"
 	"github.com/sho0pi/tickli/internal/config"
 	"github.com/sho0pi/tickli/internal/types"
 	"github.com/sho0pi/tickli/internal/utils"
@@ -70,7 +69,7 @@ The selected project becomes the default context for future commands.`,
 	Args: cobra.MaximumNArgs(0),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// first get all the available projects.
-		projects, err := api.GetProjects()
+		projects, err := TickliClient.ListProjects()
 		if err != nil {
 			return errors.Wrap(err, "failed to get projects")
 		}

@@ -3,14 +3,14 @@ package cmd
 import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/sho0pi/tickli/internal/api"
 	"github.com/sho0pi/tickli/internal/config"
 	"github.com/spf13/cobra"
 	"os"
 	"time"
 )
 
-// TODO: think about how to avoid reading the token in almost every api call
-var Token string
+var TickliClient *api.Client
 
 var rootCmd = &cobra.Command{
 	Use:   "tickli",
@@ -21,11 +21,14 @@ Complete documentation is available at https://github.com/sho0pi/tickli`,
 	SilenceUsage:  true,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		// Skip initialization check for init command
-		if cmd.Name() != "init" {
-			Token, err := config.LoadToken()
-			if err != nil || Token == "" {
+		if cmd.Name() != "init" && cmd.Name() != "reset" && cmd.Name() != "help" {
+			token, err := config.LoadToken()
+			if err != nil || token == "" {
 				log.Fatal().Msg("Please run 'tickli init' first")
 			}
+
+			// Init the TickliClient
+			TickliClient = api.NewClient(token)
 		}
 	},
 }
