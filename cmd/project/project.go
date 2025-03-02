@@ -28,4 +28,6 @@ func init() {
 	Cmd.AddCommand(newCreateProjectCommand())
 	Cmd.AddCommand(newUpdateProjectCommand())
 	Cmd.AddCommand(newUseProjectCmd())
+	Cmd.AddCommand(newDeleteCommand())
+	Cmd.AddCommand(newShowCommand())
 }

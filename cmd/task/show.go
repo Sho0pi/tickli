@@ -10,39 +10,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type OutputFormat string
-
-const (
-	OutputSimple OutputFormat = "simple"
-	OutputJSON   OutputFormat = "json"
-)
-
-func (o *OutputFormat) Set(value string) error {
-	switch OutputFormat(value) {
-	case OutputSimple, OutputJSON:
-		*o = OutputFormat(value)
-	default:
-		return fmt.Errorf("invalid output format: %s", value)
-	}
-	return nil
-}
-
-func (o OutputFormat) String() string {
-	return string(o)
-}
-
-func (o OutputFormat) Type() string {
-	return "OutputFormat"
-}
-
 type showOptions struct {
 	projectID string
-	output    OutputFormat
+	output    types.OutputFormat
 }
 
 func newShowCommand() *cobra.Command {
 	opts := &showOptions{
-		output: OutputSimple,
+		output: types.OutputSimple,
 	}
 	cmd := &cobra.Command{
 		Use:     "show [task-id]",
@@ -66,9 +41,9 @@ func newShowCommand() *cobra.Command {
 				return fmt.Errorf("task %s not found for porject %s", taskId, projectID)
 			}
 			switch opts.output {
-			case OutputSimple:
+			case types.OutputSimple:
 				fmt.Println(utils.GetTaskDescription(task, types.DefaultColor))
-			case OutputJSON:
+			case types.OutputJSON:
 				jsonData, err := json.MarshalIndent(task, "", "  ")
 				if err != nil {
 					return errors.Wrap(err, "failed to marshal output")
