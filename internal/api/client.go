@@ -137,6 +137,22 @@ func (c *Client) ListTasks(projectID string) ([]*types.Task, error) {
 	return projectData.Tasks, nil
 }
 
+func (c *Client) GetProjectWithTasks(projectID string) (*types.ProjectData, error) {
+	var projectData types.ProjectData
+	resp, err := c.http.R().
+		SetResult(&projectData).
+		Get(fmt.Sprintf("/project/%s/data", projectID))
+
+	if err != nil {
+		return nil, errors.Wrap(err, "getting project data")
+	}
+	if resp.IsError() {
+		return nil, fmt.Errorf("failed to get project data: %s", resp.String())
+	}
+
+	return &projectData, nil
+}
+
 func (c *Client) CreateTask(task *types.Task) (*types.Task, error) {
 	if task == nil {
 		return nil, errors.New("task cannot be nil")

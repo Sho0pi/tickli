@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
 	"github.com/sho0pi/tickli/internal/config"
 	"github.com/sho0pi/tickli/internal/types"
 	"github.com/sho0pi/tickli/internal/utils"
@@ -40,11 +39,26 @@ func newShowCommand() *cobra.Command {
 			}
 
 			if opts.withTasks {
-				log.Warn().Msg("with-tasks flag is not implemented yet")
+				projectData, err := TickliClient.GetProjectWithTasks(opts.projectID)
+				if err != nil {
+					return errors.Wrap(err, "failed to get project data")
+				}
+				switch opts.output {
+				case types.OutputSimple:
+					fmt.Println(utils.GetProjectDescription(&projectData.Project))
+					for _, task := range projectData.Tasks {
+						fmt.Println(utils.GetTaskDescription(&task, projectData.Project.Color))
+					}
+				case types.OutputJSON:
+					jsonData, err := json.MarshalIndent(projectData, "", "  ")
+					if err != nil {
+						return errors.Wrap(err, "failed to marshal output")
+					}
+					fmt.Println(string(jsonData))
+				}
 			} else {
 				project, err := TickliClient.GetProject(opts.projectID)
 				if err != nil {
-					log.Warn().Str("project-id", opts.projectID).Msg("project not found")
 					return fmt.Errorf("project %s not found", opts.projectID)
 				}
 				switch opts.output {
