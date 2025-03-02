@@ -6,9 +6,9 @@ import "encoding/json"
 type ViewMode string
 
 const (
-	ViewModeList     = "list"
-	ViewModeKanban   = "kanban"
-	ViewModeTimeline = "timeline"
+	ViewModeList     ViewMode = "list"
+	ViewModeKanban   ViewMode = "kanban"
+	ViewModeTimeline ViewMode = "timeline"
 )
 
 func (vm *ViewMode) UnmarshalJSON(data []byte) error {
@@ -17,7 +17,7 @@ func (vm *ViewMode) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	switch viewMode {
-	case ViewModeList, ViewModeKanban, ViewModeTimeline:
+	case string(ViewModeList), string(ViewModeKanban), string(ViewModeTimeline):
 		*vm = ViewMode(viewMode)
 	default:
 		*vm = ViewModeList
@@ -31,4 +31,18 @@ func (vm ViewMode) MarshalJSON() ([]byte, error) {
 
 func (vm ViewMode) String() string {
 	return string(vm)
+}
+
+func (vm *ViewMode) Set(s string) error {
+	switch s {
+	case string(ViewModeList), string(ViewModeKanban), string(ViewModeTimeline):
+		*vm = ViewMode(s)
+	default:
+		*vm = ViewModeList
+	}
+	return nil
+}
+
+func (vm *ViewMode) Type() string {
+	return "ViewMode"
 }

@@ -2,10 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/ijt/go-anytime"
 	"github.com/pkg/errors"
 	"github.com/sho0pi/tickli/internal/config"
 	"github.com/sho0pi/tickli/internal/types"
 	"github.com/spf13/cobra"
+	"time"
 )
 
 var (
@@ -52,6 +54,12 @@ tickli add "Doctor appointment" --date "next Monday at 10am"
 	Args: cobra.MaximumNArgs(1),
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 
+		if addDate != "" {
+			if addStartDate != "" || addDueDate != "" {
+				return errors.New("cannot specify both --date and --start-date/--due-date flags")
+			}
+		}
+
 		if len(args) > 0 {
 			title = args[0]
 		} else {
@@ -92,22 +100,29 @@ tickli add "Doctor appointment" --date "next Monday at 10am"
 			Tags:      addTags,
 		}
 
-		fmt.Println(task)
+		if addDate != "" {
 
-		newTask, err := TickliClient.CreateTask(task)
+			r, err := parseRange(addDate)
+			if err != nil {
+				return err
+			}
+
+			task.StartDate = types.TickTickTime(r.Start())
+			task.DueDate = types.TickTickTime(r.End())
+		}
+
+		task, err := TickliClient.CreateTask(task)
 		if err != nil {
 			return errors.Wrap(err, "failed to create task")
 		}
 
-		fmt.Println()
-		fmt.Println(newTask)
-
+		fmt.Println(task.ID)
 		return nil
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(addCmd)
+	RootCmd.AddCommand(addCmd)
 
 	addCmd.Flags().StringVar(&addProjectID, "project-id", "", "Project ID for the task (default is from configuration)")
 	addCmd.Flags().BoolVarP(&addAllDay, "all-day", "a", false, "Mark task as an all-day task")
@@ -123,4 +138,30 @@ func init() {
 	addCmd.Flags().StringVar(&addDueDate, "due-date", "", "Due date in natural language (e.g., 'next friday', '6 oct 2022')")
 	addCmd.Flags().StringSliceVarP(&addTags, "tags", "t", []string{}, "Tags to add to the task")
 
+}
+
+func parseRange(text string) (anytime.Range, error) {
+	r, err := anytime.ParseRange(text, time.Now())
+	if err != nil {
+		return anytime.Range{}, errors.Wrap(err, "failed to parse date")
+	}
+	fmt.Println(r.String())
+
+	return r, nil
+
+	//w := when.New(nil)
+	//w.Add(en.All...)
+	//w.Add(common.All...)
+	//
+	//r, err := w.Parse(text, time.Now())
+	//if err != nil {
+	//	return time.Time{}, errors.Wrap(err, "failed to parse date")
+	//}
+	//if r == nil {
+	//	return time.Time{}, errors.New("invalid date")
+	//}
+	//
+	//fmt.Println(r.Time.String())
+	//
+	//return r.Time, nil
 }

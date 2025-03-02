@@ -36,3 +36,12 @@ func (c ProjectColor) Sprint(a ...any) string {
 func (c ProjectColor) String() string {
 	return "#" + strings.ToUpper(color.RGBColor(c).Hex())
 }
+
+func (c *ProjectColor) Set(s string) error {
+	*c = ProjectColor(color.HEX(s))
+	return nil
+}
+
+func (c *ProjectColor) Type() string {
+	return "ProjectColor"
+}

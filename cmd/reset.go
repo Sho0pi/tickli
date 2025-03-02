@@ -22,5 +22,5 @@ This is useful if you need to reauthenticate with TickTick.`,
 }
 
 func init() {
-	rootCmd.AddCommand(resetCmd)
+	RootCmd.AddCommand(resetCmd)
 }

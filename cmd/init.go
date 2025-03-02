@@ -90,5 +90,5 @@ func openBrowser(url string) (err error) {
 }
 
 func init() {
-	rootCmd.AddCommand(initCmd)
+	RootCmd.AddCommand(initCmd)
 }

@@ -2,12 +2,11 @@ package utils
 
 import (
 	"fmt"
-	"github.com/gookit/color"
 	"github.com/ktr0731/go-fuzzyfinder"
 	"github.com/sho0pi/tickli/internal/types"
 )
 
-func GetProjectDescription(project types.Project) string {
+func GetProjectDescription(project *types.Project) string {
 	var projectStatus string
 	if project.Closed {
 		projectStatus = "Closed"
@@ -39,11 +38,7 @@ Tasks:`,
 	return description
 }
 
-func GetTaskDescription(task types.Task, projectColorHEX string) string {
-	projectColor := color.HEX(projectColorHEX, true)
-	if projectColorHEX == "" {
-		projectColor = color.HEX("#000000", true)
-	}
+func GetTaskDescription(task *types.Task, projectColor types.ProjectColor) string {
 	projectLine := projectColor.Sprint("----------------------")
 
 	description := fmt.Sprintf(`
@@ -77,7 +72,10 @@ Tasks:`,
 	return description
 }
 
-func FuzzySelectProject(projects []types.Project, query string) (*types.Project, error) {
+func FuzzySelectProject(projects []*types.Project, query string) (*types.Project, error) {
+	if len(projects) == 0 {
+		return nil, fmt.Errorf("no projects available for selection")
+	}
 	idx, err := fuzzyfinder.Find(
 		projects,
 		func(i int) string {
@@ -96,13 +94,13 @@ func FuzzySelectProject(projects []types.Project, query string) (*types.Project,
 		fuzzyfinder.WithPromptString("Search Project: "),
 	)
 	if err != nil {
-		return &types.Project{}, err
+		return nil, err
 	}
 
-	return &projects[idx], nil
+	return projects[idx], nil
 }
 
-func FuzzySelectTask(tasks []types.Task, projectColorHEX string, query string) (*types.Task, error) {
+func FuzzySelectTask(tasks []*types.Task, projectColor types.ProjectColor, query string) (*types.Task, error) {
 	idx, err := fuzzyfinder.Find(
 		tasks,
 		func(i int) string {
@@ -116,13 +114,13 @@ func FuzzySelectTask(tasks []types.Task, projectColorHEX string, query string) (
 			if i == -1 {
 				return ""
 			}
-			return GetTaskDescription(tasks[i], projectColorHEX)
+			return GetTaskDescription(tasks[i], projectColor)
 		}),
 		fuzzyfinder.WithPromptString("Search Project: "),
 	)
 	if err != nil {
-		return &types.Task{}, err
+		return nil, err
 	}
 
-	return &tasks[idx], nil
+	return tasks[idx], nil
 }

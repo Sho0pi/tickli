@@ -17,7 +17,7 @@ type Project struct {
 	Color      ProjectColor `json:"color"`
 	SortOrder  int64        `json:"sortOrder"`
 	Closed     bool         `json:"closed"`
-	GroupID    *string      `json:"groupId"`
+	GroupID    string       `json:"groupId"`
 	ViewMode   ViewMode     `json:"viewMode"`
 	Permission string       `json:"permission"`
 	Kind       ProjectKind  `json:"kind"`

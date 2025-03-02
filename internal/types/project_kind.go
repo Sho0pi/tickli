@@ -1,6 +1,9 @@
 package types
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type ProjectKind string
 
@@ -40,4 +43,18 @@ func (k ProjectKind) String() string {
 	default:
 		return "🔧Unknown"
 	}
+}
+
+func (k *ProjectKind) Set(s string) error {
+	switch s {
+	case string(KindTask), string(KindNote), string(KindInbox):
+		*k = ProjectKind(s)
+	default:
+		return fmt.Errorf("invalid project kind %q", s)
+	}
+	return nil
+}
+
+func (k *ProjectKind) Type() string {
+	return "ProjectKind"
 }

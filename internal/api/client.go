@@ -60,8 +60,8 @@ func GetAccessToken(clientID, clientSecret, code string) (string, error) {
 	return result.AccessToken, nil
 }
 
-func (c *Client) ListProjects() ([]types.Project, error) {
-	var projects []types.Project
+func (c *Client) ListProjects() ([]*types.Project, error) {
+	var projects []*types.Project
 	resp, err := c.http.R().
 		SetResult(&projects).
 		Get("/project")
@@ -75,14 +75,52 @@ func (c *Client) ListProjects() ([]types.Project, error) {
 	}
 
 	// Adds the default InboxProject - not appears by default
-	projects = append(projects, types.InboxProject)
+	projects = append(projects, &types.InboxProject)
 
 	return projects, nil
 }
 
-func (c *Client) ListTasks(projectID string) ([]types.Task, error) {
+func (c *Client) GetProject(id string) (*types.Project, error) {
+	if id == "inbox" {
+		return &types.InboxProject, nil
+	}
+	var project *types.Project
+	resp, err := c.http.R().
+		SetResult(&project).
+		Get("/project/" + id)
+
+	if err != nil {
+		return nil, errors.Wrap(err, "getting project")
+	}
+	if resp.IsError() {
+		return nil, fmt.Errorf("failed to get project: %s", resp.String())
+	}
+	if project == nil {
+		return nil, fmt.Errorf("project not found: %s", id)
+	}
+
+	return project, nil
+}
+
+func (c *Client) GetTask(projectID string, taskID string) (*types.Task, error) {
+	var task types.Task
+	resp, err := c.http.R().
+		SetResult(&task).
+		Get(fmt.Sprintf("/project/%s/task/%s", projectID, taskID))
+
+	if err != nil {
+		return nil, errors.Wrap(err, "requesting task")
+	}
+	if resp.IsError() {
+		return nil, fmt.Errorf("failed to list tasks: %s", resp.String())
+	}
+
+	return &task, nil
+}
+
+func (c *Client) ListTasks(projectID string) ([]*types.Task, error) {
 	var projectData struct {
-		Tasks []types.Task `json:"tasks"`
+		Tasks []*types.Task `json:"tasks"`
 	}
 	resp, err := c.http.R().
 		SetResult(&projectData).
@@ -148,11 +186,9 @@ func (c *Client) CompleteTask(projectID, taskID string) error {
 }
 
 // TODO: add option to set color
-func (c *Client) CreateProject(name string) (*types.Project, error) {
-	project := &types.Project{
-		Name:     name,
-		ViewMode: types.ViewModeList,
-		Kind:     types.KindTask,
+func (c *Client) CreateProject(project *types.Project) (*types.Project, error) {
+	if project == nil {
+		return nil, errors.New("project cannot be nil")
 	}
 
 	resp, err := c.http.R().

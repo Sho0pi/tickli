@@ -3,9 +3,11 @@ module github.com/sho0pi/tickli
 go 1.24.0
 
 require (
+	github.com/alecthomas/kong v1.8.1
 	github.com/dustin/go-humanize v1.0.1
 	github.com/go-resty/resty/v2 v2.16.5
 	github.com/gookit/color v1.5.4
+	github.com/ijt/go-anytime v1.9.2
 	github.com/joho/godotenv v1.5.1
 	github.com/ktr0731/go-fuzzyfinder v0.8.0
 	github.com/pkg/errors v0.9.1
@@ -20,6 +22,7 @@ require (
 	github.com/gdamore/encoding v1.0.0 // indirect
 	github.com/gdamore/tcell/v2 v2.6.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/ijt/goparsify v0.0.0-20221203142333-3a5276334b8d // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/ktr0731/go-ansisgr v0.1.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
