@@ -26,4 +26,5 @@ go.work.sum
 
 .idea/
 
-tickli
+tickli# Added by goreleaser init:
+dist/
