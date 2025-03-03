@@ -16,9 +16,6 @@ builds:
       - arm64
     ldflags:
       - -s -w -X 'github.com/sho0pi/tickli/cmd.clientID={{ .Env.CLIENT_ID }}' -X 'github.com/sho0pi/tickli/cmd.clientSecret={{ .Env.CLIENT_SECRET }}'
-    hooks:
-      post:
-        - cp completions/* dist/
 
 archives:
   - format: tar.gz
@@ -27,7 +24,6 @@ archives:
       - LICENSE
       - README.md
       - completions/*
-      - dist/tickli.*
 #    extra_files:
 #      - glob: dist/tickli.*
 

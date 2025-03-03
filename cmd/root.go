@@ -23,6 +23,10 @@ Complete documentation is available at https://github.com/sho0pi/tickli`,
 	SilenceErrors: true,
 	SilenceUsage:  true,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		// Skip initialization check for shell completion
+		if cmd.Name() == "bash" || cmd.Name() == "zsh" || cmd.Name() == "fish" {
+			return
+		}
 		// Skip initialization check for init command
 		if cmd.Name() != "init" && cmd.Name() != "reset" && cmd.Name() != "help" && cmd.Name() != "completion" {
 			token, err := config.LoadToken()
