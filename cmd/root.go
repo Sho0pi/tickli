@@ -24,7 +24,7 @@ Complete documentation is available at https://github.com/sho0pi/tickli`,
 	SilenceUsage:  true,
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		// Skip initialization check for init command
-		if cmd.Name() != "init" && cmd.Name() != "reset" && cmd.Name() != "help" {
+		if cmd.Name() != "init" && cmd.Name() != "reset" && cmd.Name() != "help" && cmd.Name() != "completion" {
 			token, err := config.LoadToken()
 			if err != nil || token == "" {
 				log.Fatal().Msg("Please run 'tickli init' first")

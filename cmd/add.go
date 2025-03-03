@@ -122,7 +122,7 @@ tickli add "Doctor appointment" --date "next Monday at 10am"
 }
 
 func init() {
-	RootCmd.AddCommand(addCmd)
+	//RootCmd.AddCommand(addCmd)
 
 	addCmd.Flags().StringVar(&addProjectID, "project-id", "", "Project ID for the task (default is from configuration)")
 	addCmd.Flags().BoolVarP(&addAllDay, "all-day", "a", false, "Mark task as an all-day task")
