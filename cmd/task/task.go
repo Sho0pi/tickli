@@ -42,9 +42,11 @@ var Cmd = &cobra.Command{
 }
 
 func init() {
-	//Cmd.PersistentFlags().StringVarP(&projectID, "project-id", "p", "", "Project ID for the action scope (default is current project)")
 	Cmd.AddCommand(newCreateCommand())
 	Cmd.AddCommand(newUpdateCommand())
 	Cmd.AddCommand(newListCommand())
+	Cmd.AddCommand(newCompleteCmd())
+	Cmd.AddCommand(newUncompleteCommand())
+	Cmd.AddCommand(newDeleteCommand())
 	Cmd.AddCommand(newShowCommand())
 }

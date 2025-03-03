@@ -14,10 +14,11 @@ type deleteOptions struct {
 func newDeleteCommand() *cobra.Command {
 	opts := deleteOptions{}
 	cmd := &cobra.Command{
-		Use:   "delete",
+		Use:   "delete [project-id]",
 		Short: "Delete an existing project",
-		Args:  cobra.NoArgs,
+		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
+			opts.projectID = args[0]
 			if !opts.force {
 				var confirm string
 				fmt.Printf("Are you sure you want to delete the project %s? (y/N): ", opts.projectID)
@@ -39,8 +40,6 @@ func newDeleteCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.projectID, "project-id", "i", "", "Project ID to delete")
-	cmd.MarkFlagRequired("project-id")
 	cmd.Flags().BoolVarP(&opts.force, "force", "f", false, "Force deletion without confirmation")
 
 	return cmd

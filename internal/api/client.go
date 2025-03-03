@@ -201,7 +201,6 @@ func (c *Client) CompleteTask(projectID, taskID string) error {
 	return nil
 }
 
-// TODO: add option to set color
 func (c *Client) CreateProject(project *types.Project) (*types.Project, error) {
 	if project == nil {
 		return nil, errors.New("project cannot be nil")
