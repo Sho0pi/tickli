@@ -11,6 +11,7 @@ var TickliClient *api.Client
 
 var Cmd = &cobra.Command{
 	Use:     "project",
+	Short:   "Work with TickTick projects.",
 	Aliases: []string{"list"},
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		token, err := config.LoadToken()

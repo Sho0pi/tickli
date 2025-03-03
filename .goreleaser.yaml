@@ -47,9 +47,9 @@ brews:
     description: A simple CLI for managing your tasks.
     install: |
       bin.install "tickli"
-      bash_completion.install "tickli.bash" => "tickli"
-      zsh_completion.install "tickli.zsh" => "_tickli"
-      fish_completion.install "tickli.fish" => "tickli.fish"
+      bash_completion.install "completions/tickli.bash" => "tickli"
+      zsh_completion.install "completions/tickli.zsh" => "_tickli"
+      fish_completion.install "completions/tickli.fish" => "tickli.fish"
 #    test: |
 #      system "#{bin}/tickli --version"
 

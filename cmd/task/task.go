@@ -16,7 +16,8 @@ var (
 )
 
 var Cmd = &cobra.Command{
-	Use: "task",
+	Use:   "task",
+	Short: "Work on TickTick tasks.",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 
 		token, err := config.LoadToken()
