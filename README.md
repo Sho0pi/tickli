@@ -19,13 +19,16 @@ Tickli is a powerful CLI tool that lets you manage your TickTick tasks and proje
 
 ## Installation
 
-```bash
-# Using Homebrew
-brew install tickli
+### Using Homebrew
 
-# Or download directly from the releases page
-# https://github.com/Sho0pi/tickli/releases
+```bash
+brew tap sho0pi/brew
+brew install tickli
 ```
+
+### Download from Releases
+
+You can also download prebuilt binaries from the [GitHub releases page](https://github.com/Sho0pi/tickli/releases).
 
 ## Quick Start
 
@@ -54,15 +57,15 @@ tickli task complete <task-id>
 
 ## Key Commands
 
-| Command | Description |
-|---------|-------------|
-| `tickli init` | Set up authentication with TickTick |
-| `tickli project list` | Show all your projects |
-| `tickli project use` | Switch active project context |
-| `tickli add` | Quickly add a new task |
-| `tickli task list` | List tasks in current project |
-| `tickli task show` | View task details |
-| `tickli task complete` | Mark a task as complete |
+| Command                | Description                         |
+| ---------------------- | ----------------------------------- |
+| `tickli init`          | Set up authentication with TickTick |
+| `tickli project list`  | Show all your projects              |
+| `tickli project use`   | Switch active project context       |
+| `tickli add`           | Quickly add a new task              |
+| `tickli task list`     | List tasks in current project       |
+| `tickli task show`     | View task details                   |
+| `tickli task complete` | Mark a task as complete             |
 
 ## Interactive TUI Experience (Coming Soon!)
 

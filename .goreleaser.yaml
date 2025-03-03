@@ -42,7 +42,7 @@ brews:
   - name: tickli
     repository:
       owner: sho0pi
-      name: homebrew-tap
+      name: brew
     homepage: https://github.com/sho0pi/tickli
     description: A simple CLI for managing your tasks.
     install: |
