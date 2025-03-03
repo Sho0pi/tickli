@@ -1,7 +1,9 @@
+version: 2
+
 before:
   hooks:
-    # You may remove this if you don't use go modules.
     - go mod tidy
+    - ./scripts/generate-completions.sh
 
 builds:
   - env:
@@ -14,6 +16,9 @@ builds:
       - arm64
     ldflags:
       - -s -w -X 'github.com/sho0pi/tickli/cmd.clientID={{ .Env.CLIENT_ID }}' -X 'github.com/sho0pi/tickli/cmd.clientSecret={{ .Env.CLIENT_SECRET }}'
+    hooks:
+      post:
+        - cp completions/* dist/
 
 archives:
   - format: tar.gz
@@ -21,6 +26,10 @@ archives:
     files:
       - LICENSE
       - README.md
+      - completions/*
+      - dist/tickli.*
+#    extra_files:
+#      - glob: dist/tickli.*
 
 checksum:
   name_template: "checksums.txt"
@@ -31,3 +40,20 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+
+
+brews:
+  - name: tickli
+    repository:
+      owner: sho0pi
+      name: homebrew-tap
+    homepage: https://github.com/sho0pi/tickli
+    description: A simple CLI for managing your tasks.
+    install: |
+      bin.install "tickli"
+      bash_completion.install "tickli.bash" => "tickli"
+      zsh_completion.install "tickli.zsh" => "_tickli"
+      fish_completion.install "tickli.fish" => "tickli.fish"
+#    test: |
+#      system "#{bin}/tickli --version"
+
