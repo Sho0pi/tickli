@@ -25,6 +25,18 @@ func newCreateProjectCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create [project-name]",
 		Short: "Create a new project",
+		Long: `Create a new TickTick project with customizable properties.
+    
+You can specify a name, color, view mode, and project type. The command
+supports both direct parameter input and interactive mode.`,
+		Example: `  # Create a basic task project
+  tickli project create "My New Project"
+  
+  # Create a project with custom properties
+  tickli project create -n "Work Tasks" -c "#FF5733" --view-mode kanban --kind TASK
+  
+  # Create a project in interactive mode
+  tickli project create -i`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			project := &types.Project{
 				Name:     opts.name,
@@ -43,13 +55,14 @@ func newCreateProjectCommand() *cobra.Command {
 			return nil
 		},
 	}
-
-	cmd.Flags().StringVarP(&opts.name, "name", "n", "", "Name of the project (required if not using interactive mode)")
-	cmd.MarkFlagRequired("name")
-	cmd.Flags().VarP(&opts.color, "color", "c", "Color of the project (hex format, e.g., '#F18181')")
-	cmd.Flags().Var(&opts.viewMode, "view-mode", "View mode: list, kanban, timeline (default 'list')")
-	cmd.Flags().Var(&opts.kind, "kind", "Project kind: TASK, NOTE (default 'TASK')")
-	cmd.Flags().BoolVarP(&opts.interactive, "interactive", "i", false, "Create project interactively (prompt for fields)")
+	cmd.Flags().StringVarP(&opts.name, "name", "n", "", "Name of the new project")
+	_ = cmd.MarkFlagRequired("name")
+	cmd.Flags().VarP(&opts.color, "color", "c", "Color for the project (hex format, e.g., '#F18181')")
+	cmd.Flags().Var(&opts.viewMode, "view-mode", "How to display tasks: list, kanban, or timeline (default: list)")
+	_ = cmd.RegisterFlagCompletionFunc("view-mode", types.RegisterViewModeCompletions)
+	cmd.Flags().Var(&opts.kind, "kind", "Project type: TASK for action items or NOTE for information (default: TASK)")
+	_ = cmd.RegisterFlagCompletionFunc("kind", types.RegisterProjectKindCompletions)
+	cmd.Flags().BoolVarP(&opts.interactive, "interactive", "i", false, "Create project by answering prompts instead of using flags")
 
 	return cmd
 }

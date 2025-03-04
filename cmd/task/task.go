@@ -17,7 +17,20 @@ var (
 
 var Cmd = &cobra.Command{
 	Use:   "task",
-	Short: "Work on TickTick tasks.",
+	Short: "Work with TickTick tasks",
+	Long: `Create, view, update, and manage tasks in your TickTick projects.
+    
+All task commands operate on the current active project by default.
+You can change the current project with 'tickli project use' or
+specify a different project with the --project-id flag.`,
+	Example: `  # List all tasks in current project
+  tickli task list
+  
+  # Create a new task
+  tickli task create -t "Submit quarterly report"
+  
+  # Complete a task
+  tickli task complete abc123def456`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 
 		token, err := config.LoadToken()

@@ -1,6 +1,9 @@
 package types
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"github.com/spf13/cobra"
+)
 
 // ViewMode describes the view mode of the project, by default will be "list"
 type ViewMode string
@@ -10,6 +13,10 @@ const (
 	ViewModeKanban   ViewMode = "kanban"
 	ViewModeTimeline ViewMode = "timeline"
 )
+
+func RegisterViewModeCompletions(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	return []string{string(ViewModeList), string(ViewModeTimeline), string(ViewModeKanban)}, cobra.ShellCompDirectiveDefault
+}
 
 func (vm *ViewMode) UnmarshalJSON(data []byte) error {
 	var viewMode string

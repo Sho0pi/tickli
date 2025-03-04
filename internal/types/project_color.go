@@ -2,7 +2,9 @@ package types
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gookit/color"
+	"regexp"
 	"strings"
 )
 
@@ -38,6 +40,20 @@ func (c ProjectColor) String() string {
 }
 
 func (c *ProjectColor) Set(s string) error {
+	// Validate the hex color format
+	s = strings.TrimSpace(s)
+
+	// This pattern matches both 3-digit and 6-digit hex colors, with optional "#" prefix
+	hexPattern := regexp.MustCompile(`^#?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$`)
+	if !hexPattern.MatchString(s) {
+		return fmt.Errorf("invalid hex color format: must be a 3 or 6-digit hex color code (e.g., '#F18' or '#F18181')")
+	}
+
+	// Add the "#" back if it was missing
+	if !strings.HasPrefix(s, "#") {
+		s = "#" + s
+	}
+
 	*c = ProjectColor(color.HEX(s))
 	return nil
 }

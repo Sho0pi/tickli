@@ -2,12 +2,14 @@ package task
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"github.com/sho0pi/tickli/internal/types"
 	"github.com/spf13/cobra"
 )
 
 type updateOptions struct {
-	taskID string
+	projectID string
+	taskID    string
 
 	title       string
 	content     string
@@ -33,30 +35,66 @@ type updateOptions struct {
 func newUpdateCommand() *cobra.Command {
 	opts := &updateOptions{}
 	cmd := &cobra.Command{
-		Use:   "update [task-id]",
-		Short: "Update an existing task",
-		Args:  cobra.ExactArgs(1),
+		Use:   "update <task-id>",
+		Short: "Modify an existing task's properties",
+		Long: `Update any property of an existing task identified by its ID.
+    
+Changes only the properties you specify - others remain unchanged.
+This command allows modifying title, content, priority, dates, and more.`,
+		Example: `  # Update a task's title
+  tickli task update abc123def456 -t "New title"
+  
+  # Update priority and add content
+  tickli task update abc123def456 -p high -c "Additional details here"
+  
+  # Change due date
+  tickli task update abc123def456 --due "next Friday 5pm"
+  
+  # Update interactively
+  tickli task update abc123def456 -i`,
+		Args: cobra.ExactArgs(1),
+		PreRun: func(cmd *cobra.Command, args []string) {
+			if opts.projectID == "" {
+				opts.projectID = projectID
+			}
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			opts.taskID = args[0]
-			fmt.Println("Updating task:", opts.taskID)
+			task := &types.Task{
+				ID:        opts.taskID,
+				ProjectID: opts.projectID,
+			}
+			//fmt.Println("task", task)
+			//if opts.content != "" {
+			//	task.Content = opts.content
+			//}
+			//if opts.description != "" {
+			//	task.Desc = opts.description
+			//}
+
+			task, err := TickliClient.UpdateTask(task)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("failed to update task %s", opts.taskID))
+			}
+
 			return nil
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.title, "title", "t", "", "New task title")
-	cmd.Flags().StringVarP(&opts.content, "content", "c", "", "New additional content or description")
+	cmd.Flags().StringVar(&opts.projectID, "project-id", "", "Specific project instead of the current one")
+	cmd.Flags().StringVarP(&opts.title, "title", "t", "", "Change the task title")
+	cmd.Flags().StringVarP(&opts.content, "content", "c", "", "Change or add content/description")
 	cmd.Flags().StringVarP(&opts.description, "desc", "d", "", "New description (for checklist)")
-	cmd.Flags().BoolVarP(&opts.allDay, "all-day", "a", false, "Mark as an all-day task")
-	cmd.Flags().StringVar(&opts.startDate, "start", "", "New start date/time (natural language: 'today 3pm', 'tomorrow', etc)")
-	cmd.Flags().StringVar(&opts.dueDate, "due", "", "New due date/time (natural language: 'today 6pm', 'next friday', etc)")
-	cmd.Flags().StringVar(&opts.timeZone, "timezone", "", "New timezone (e.g., 'America/Los_Angeles')")
-	cmd.Flags().StringSliceVar(&opts.reminders, "reminders", []string{}, "New list of reminder triggers (e.g., '9h', '0s')")
+	cmd.Flags().MarkDeprecated("desc", "please use --content")
+	cmd.Flags().BoolVarP(&opts.allDay, "all-day", "a", false, "Toggle all-day status for the task")
+	cmd.Flags().StringVar(&opts.startDate, "start", "", "Change when the task begins")
+	cmd.Flags().StringVar(&opts.dueDate, "due", "", "Change when the task is due")
+	cmd.Flags().StringVar(&opts.timeZone, "timezone", "", "Change timezone for date calculations")
+	cmd.Flags().StringSliceVar(&opts.reminders, "reminders", []string{}, "Set reminders (e.g., '10m', '1h before')")
 	cmd.Flags().StringVar(&opts.repeat, "repeat", "", "New recurring rule (e.g., 'daily', 'weekly on monday')")
-	cmd.Flags().Var(&opts.priority, "priority", "New priority level: none, low, medium, high")
-	_ = cmd.RegisterFlagCompletionFunc("priority", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return []string{"none", "low", "medium", "high"}, cobra.ShellCompDirectiveDefault
-	})
-	cmd.Flags().BoolVarP(&opts.interactive, "interactive", "i", false, "Update task interactively (prompt for fields)")
+	cmd.Flags().Var(&opts.priority, "priority", "Change task importance: none, low, medium, high")
+	_ = cmd.RegisterFlagCompletionFunc("priority", types.RegisterTaskPriorityCompletions)
+	cmd.Flags().BoolVarP(&opts.interactive, "interactive", "i", false, "Update task by answering prompts")
 
 	return cmd
 }

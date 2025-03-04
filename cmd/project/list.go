@@ -32,9 +32,16 @@ func newListCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "list",
 		Aliases: []string{"ls"},
-		Short:   "Show all available projects without setting them as default",
-		Long: `Show all available projects without setting any of them as the default. 
-Lists each project with its details.`,
+		Short:   "List and select from available projects",
+		Long: `Display all available projects and allow selection of one.
+
+This command shows all projects matching the optional filter criteria,
+then displays a fuzzy-search selector to choose a project.`,
+		Example: `  # List all projects
+  tickli project list
+  
+  # Filter projects by name
+  tickli project list -f "work"`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			projects, err := TickliClient.ListProjects()
 			if err != nil {
@@ -56,7 +63,7 @@ Lists each project with its details.`,
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.filter, "filter", "f", "", "Filter projects by name")
+	cmd.Flags().StringVarP(&opts.filter, "filter", "f", "", "Only show projects with names containing the provided text")
 
 	return cmd
 }

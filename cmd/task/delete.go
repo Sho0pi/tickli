@@ -14,10 +14,22 @@ type deleteOptions struct {
 func newDeleteCommand() *cobra.Command {
 	opts := &deleteOptions{}
 	cmd := &cobra.Command{
-		Use:     "delete [task-id]",
+		Use:     "delete <task-id>",
 		Aliases: []string{"rm", "remove"},
-		Short:   "Delete a task",
-		Args:    cobra.ExactArgs(1),
+		Short:   "Remove a task permanently",
+		Long: `Delete a task completely from your TickTick account.
+    
+This operation cannot be undone. By default, you will be asked to confirm
+the deletion unless the --force flag is used.`,
+		Example: `  # Delete with confirmation prompt
+  tickli task delete abc123def456
+  
+  # Force delete without confirmation
+  tickli task delete abc123def456 --force
+  
+  # Delete from specific project
+  tickli task delete abc123def456 --project-id xyz789`,
+		Args: cobra.ExactArgs(1),
 		PreRun: func(cmd *cobra.Command, args []string) {
 			if opts.projectID == "" {
 				opts.projectID = projectID
@@ -46,8 +58,8 @@ func newDeleteCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.projectID, "project-id", "i", "", "Project ID containing the task (default is current project)")
-	cmd.Flags().BoolVarP(&opts.force, "force", "f", false, "Force deletion without confirmation")
+	cmd.Flags().StringVarP(&opts.projectID, "project-id", "i", "", "Project containing the task (if not in current project)")
+	cmd.Flags().BoolVarP(&opts.force, "force", "f", false, "Skip confirmation prompt and delete immediately")
 
 	return cmd
 }

@@ -112,10 +112,27 @@ func newListCommand() *cobra.Command {
 	opts := &listOptions{}
 	cmd := &cobra.Command{
 		Use:     "list",
-		Short:   "List tasks in a project",
-		Long:    "List tasks in the current project. By default, this only lists open issues.",
 		Aliases: []string{"ls"},
-		Args:    cobra.NoArgs,
+		Short:   "Browse and select from available tasks",
+		Long: `Display tasks in the current project or a specified project.
+    
+By default, only shows incomplete tasks. You can filter tasks by priority,
+tags, and due date. Results are displayed in an interactive selector.`,
+		Example: `  # List all incomplete tasks in current project
+  tickli task list
+  
+  # List all tasks including completed ones
+  tickli task list --all
+  
+  # List tasks with specific tag
+  tickli task list -t important
+  
+  # List high priority tasks
+  tickli task list -p high
+  
+  # List tasks in specific project
+  tickli task list --project-id abc123def456`,
+		Args: cobra.NoArgs,
 		PreRun: func(cmd *cobra.Command, args []string) {
 			if opts.projectID != "" {
 				projectID = opts.projectID
@@ -161,15 +178,13 @@ func newListCommand() *cobra.Command {
 			return nil
 		},
 	}
-	cmd.Flags().StringVar(&opts.projectID, "project-id", "", "Project ID for the action scope (default is current project)")
-	cmd.Flags().BoolVarP(&opts.all, "all", "a", false, "Include completed tasks")
-	cmd.Flags().StringVarP(&opts.tag, "tag", "t", "", "Tags to add to the task")
-	cmd.Flags().VarP(&opts.priority, "priority", "p", "Filter by priority (none, low, medium, high)")
-	_ = cmd.RegisterFlagCompletionFunc("priority", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return []string{"none", "low", "medium", "high"}, cobra.ShellCompDirectiveDefault
-	})
+	cmd.Flags().StringVar(&opts.projectID, "project-id", "", "List tasks from a specific project instead of the current one")
+	cmd.Flags().BoolVarP(&opts.all, "all", "a", false, "Include completed tasks in the results")
+	cmd.Flags().StringVarP(&opts.tag, "tag", "t", "", "Only show tasks with this specific tag")
+	cmd.Flags().VarP(&opts.priority, "priority", "p", "Only show tasks with this priority level or higher")
+	_ = cmd.RegisterFlagCompletionFunc("priority", types.RegisterTaskPriorityCompletions)
 	cmd.Flags().StringVar(&opts.dueDate, "due", "", "Filter by due date (today, tomorrow, this-week, overdue)")
-	cmd.Flags().BoolVarP(&opts.verbose, "verbose", "v", false, "Show additional details for each task")
+	cmd.Flags().BoolVarP(&opts.verbose, "verbose", "v", false, "Show more details for each task in the list")
 
 	return cmd
 }

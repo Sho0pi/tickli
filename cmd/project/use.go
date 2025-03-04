@@ -53,14 +53,14 @@ This command allows you to change your active project in three ways:
 
 The selected project becomes the default context for future commands.`,
 		Example: `  # Interactive project selection
-  tickli use
-
-  # Switch by partial or full project name
-  tickli use -n "My Project"
-
+  tickli project use
+  
+  # Switch by project name (can be partial)
+  tickli project use -n "Work Tasks"
+  
   # Switch by project ID
-  tickli use -i abc123`,
-		Args: cobra.MaximumNArgs(0),
+  tickli project use -i abc123def456`,
+		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			projects, err := TickliClient.ListProjects()
 			if err != nil {
@@ -115,8 +115,8 @@ The selected project becomes the default context for future commands.`,
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.projectName, "name", "n", "", "Name of the project to switch to")
-	cmd.Flags().StringVarP(&opts.projectID, "id", "i", "", "ID of the project to switch to")
+	cmd.Flags().StringVarP(&opts.projectName, "name", "n", "", "Switch to the specified project by name (partial match supported)")
+	cmd.Flags().StringVarP(&opts.projectID, "id", "i", "", "Switch to the specified project by ID")
 	cmd.MarkFlagsMutuallyExclusive("name", "id")
 	return cmd
 }

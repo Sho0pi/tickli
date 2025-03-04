@@ -22,10 +22,25 @@ func newShowCommand() *cobra.Command {
 	}
 
 	cmd := &cobra.Command{
-		Use:     "show [id]",
+		Use:     "show [project-id]",
 		Aliases: []string{"info"},
 		Short:   "Show details of a project",
-		Args:    cobra.MaximumNArgs(1),
+		Long: `Display detailed information about a specific project.
+    
+If no project ID is provided, shows the currently active project.
+Can include associated tasks and switch between output formats.`,
+		Example: `  # Show current project
+  tickli project show
+  
+  # Show specific project
+  tickli project show abc123def456
+  
+  # Show project with all its tasks
+  tickli project show --with-tasks
+  
+  # Output in JSON format
+  tickli project show -o json`,
+		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			// Determine which project to show
 			if len(args) > 0 {
@@ -76,7 +91,8 @@ func newShowCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().BoolVar(&opts.withTasks, "with-tasks", false, "Include tasks in the output")
-	cmd.Flags().VarP(&opts.output, "output", "o", "Output format. One of: simple, json")
+	cmd.Flags().BoolVar(&opts.withTasks, "with-tasks", false, "Include all tasks belonging to this project")
+	cmd.Flags().VarP(&opts.output, "output", "o", "Format for displaying results: simple (human-readable) or json (machine-readable)")
+	_ = cmd.RegisterFlagCompletionFunc("output", types.RegisterOutputFormatCompletions)
 	return cmd
 }

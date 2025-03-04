@@ -20,10 +20,22 @@ func newShowCommand() *cobra.Command {
 		output: types.OutputSimple,
 	}
 	cmd := &cobra.Command{
-		Use:     "show [task-id]",
+		Use:     "show <task-id>",
 		Aliases: []string{"info"},
-		Short:   "Show details of a task",
-		Args:    cobra.ExactArgs(1),
+		Short:   "Display detailed information about a task",
+		Long: `Show complete information about a specific task identified by its ID.
+    
+Displays title, content, dates, priority, tags, and other properties.
+You can choose between human-readable output or machine-readable JSON.`,
+		Example: `  # Show task details in human-readable format
+  tickli task show abc123def456
+  
+  # Show task from specific project
+  tickli task show abc123def456 -i xyz789
+  
+  # Show task details in JSON format
+  tickli task show abc123def456 -o json`,
+		Args: cobra.ExactArgs(1),
 		PreRun: func(cmd *cobra.Command, args []string) {
 			if opts.projectID != "" {
 				projectID = opts.projectID
@@ -55,7 +67,7 @@ func newShowCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.projectID, "project-id", "", "Project ID containing the task (default is current project)")
-	cmd.Flags().VarP(&opts.output, "output", "o", "Output format. One of: simple, json")
+	cmd.Flags().StringVarP(&opts.projectID, "project-id", "i", "", "Project containing the task (if not in current project)")
+	cmd.Flags().VarP(&opts.output, "output", "o", "Display format: simple (human-readable) or json (machine-readable)")
 	return cmd
 }

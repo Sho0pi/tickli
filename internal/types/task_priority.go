@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gookit/color"
+	"github.com/spf13/cobra"
 	"strings"
 )
 
@@ -15,6 +16,18 @@ const (
 	PriorityMedium TaskPriority = 3
 	PriorityHigh   TaskPriority = 5
 )
+
+func RegisterTaskPriorityCompletions(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	return priorityMapKeys(), cobra.ShellCompDirectiveDefault
+}
+
+func priorityMapKeys() []string {
+	keys := make([]string, 0, len(priorityMap))
+	for k := range priorityMap {
+		keys = append(keys, k)
+	}
+	return keys
+}
 
 var (
 	NonePriorityColor   = color.HEX("#C6C6C6").C256()

@@ -3,6 +3,7 @@ package types
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/spf13/cobra"
 )
 
 type ProjectKind string
@@ -13,6 +14,10 @@ const (
 	KindInbox   ProjectKind = "INBOX"
 	KindUnknown ProjectKind = "UNKNOWN"
 )
+
+func RegisterProjectKindCompletions(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	return []string{string(KindTask), string(KindNote)}, cobra.ShellCompDirectiveDefault
+}
 
 func (k *ProjectKind) UnmarshalJSON(data []byte) error {
 	var kind string
