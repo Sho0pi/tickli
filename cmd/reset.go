@@ -1,10 +1,13 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"github.com/sho0pi/tickli/internal/config"
 	"github.com/spf13/cobra"
+	"os"
+	"strings"
 )
 
 type resetOptions struct {
@@ -20,9 +23,10 @@ func newResetCommand() *cobra.Command {
 This is useful if you need to reauthenticate with TickTick.`,
 		Run: func(cmd *cobra.Command, args []string) {
 			if !opts.force {
-				var confirm string
 				fmt.Printf("Are you sure you want to reset authentication? (y/N): ")
-				fmt.Scanln(&confirm)
+				reader := bufio.NewReader(os.Stdin)
+				confirm, _ := reader.ReadString('\n')
+				confirm = strings.TrimSpace(confirm)
 				if confirm != "y" && confirm != "Y" {
 					fmt.Println("Deletion aborted")
 					return
@@ -34,7 +38,12 @@ This is useful if you need to reauthenticate with TickTick.`,
 			}
 
 			log.Info().Msg("Successfully removed access token. Running initialization...")
-			initCmd.Run(cmd, args)
+			token, err := initTickli()
+			if err != nil {
+				log.Fatal().Err(err).Msg("Failed to initialize tickli")
+			}
+			log.Info().Str("token", token).Msg("Successfully initialized tickli")
+
 		},
 	}
 

@@ -1,79 +1,69 @@
 package config
 
 import (
+	"github.com/adrg/xdg"
+	"github.com/spf13/viper"
 	"os"
 	"path/filepath"
 
 	"github.com/pkg/errors"
-	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
-	DefaultProjectID string `yaml:"default_project_id"`
+	DefaultProjectID    string `mapstructure:"default_project_id"`
+	DefaultProjectColor string `mapstructure:"default_project_color"`
 }
 
-const configPath = "~/.config/tickli/config.yaml"
+var (
+	configPath = filepath.Join(xdg.ConfigHome, "tickli", "config.yaml")
+	tokenPath  = filepath.Join(xdg.DataHome, "tickli", "token")
+)
 
-func Load() (*Config, error) {
-	path := expandPath(configPath)
+func InitConfig() error {
+	viper.SetConfigFile(configPath)
+	viper.SetConfigType("yaml")
 
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return &Config{}, nil
+	if err := os.MkdirAll(filepath.Dir(configPath), 0755); err != nil {
+		return errors.Wrap(err, "creating config directory")
 	}
 
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, errors.Wrap(err, "reading config file")
+	viper.SetDefault("default_project_id", "")
+	viper.SetDefault("default_project_color", "#FF1111")
+
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		if err := viper.SafeWriteConfigAs(configPath); err != nil {
+			return errors.Wrap(err, "writing default config")
+		}
+	}
+
+	if err := viper.ReadInConfig(); err != nil {
+		return errors.Wrap(err, "reading config")
+	}
+
+	return nil
+}
+
+func Load() (*Config, error) {
+	if err := InitConfig(); err != nil {
+		return nil, err
 	}
 
 	var cfg Config
-	if err := yaml.Unmarshal(data, &cfg); err != nil {
-		return nil, errors.Wrap(err, "parsing config file")
+	if err := viper.Unmarshal(&cfg); err != nil {
+		return nil, errors.Wrap(err, "unmarshaling config")
 	}
 
 	return &cfg, nil
 }
 
 func Save(cfg *Config) error {
-	path := expandPath(configPath)
-
-	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
-		return errors.Wrap(err, "creating config directory")
-	}
-
-	data, err := yaml.Marshal(cfg)
-	if err != nil {
-		return errors.Wrap(err, "marshaling config")
-	}
-
-	return os.WriteFile(path, data, 0600)
-}
-
-func expandPath(path string) string {
-	if path[0] == '~' {
-		home, _ := os.UserHomeDir()
-		path = filepath.Join(home, path[1:])
-	}
-	return path
-}
-
-//TODO: setup the configuration
-
-func getTokenPath() (string, error) {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(home, ".local/share/tickli/token"), nil
+	viper.Set("default_project_id", cfg.DefaultProjectID)
+	viper.Set("default_project_color", cfg.DefaultProjectColor)
+	return viper.WriteConfigAs(configPath)
 }
 
 func LoadToken() (string, error) {
-	path, err := getTokenPath()
-	if err != nil {
-		return "", err
-	}
-
-	data, err := os.ReadFile(path)
+	data, err := os.ReadFile(tokenPath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return "", nil
@@ -85,24 +75,15 @@ func LoadToken() (string, error) {
 }
 
 func SaveToken(token string) error {
-	path, err := getTokenPath()
-	if err != nil {
-		return err
-	}
-
-	if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
+	if err := os.MkdirAll(filepath.Dir(tokenPath), 0700); err != nil {
 		return errors.Wrap(err, "creating token directory")
 	}
 
-	return os.WriteFile(path, []byte(token), 0600)
+	return os.WriteFile(tokenPath, []byte(token), 0600)
 }
 
 func DeleteToken() error {
-	path, err := getTokenPath()
-	if err != nil {
-		return err
-	}
-	if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+	if err := os.Remove(tokenPath); err != nil && !os.IsNotExist(err) {
 		return err
 	}
 	return nil
