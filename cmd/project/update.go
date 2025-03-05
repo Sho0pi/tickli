@@ -1,8 +1,10 @@
 package project
 
 import (
-	"github.com/rs/zerolog/log"
+	"fmt"
+	"github.com/pkg/errors"
 	"github.com/sho0pi/tickli/internal/types"
+	"github.com/sho0pi/tickli/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -34,7 +36,29 @@ Changes only the properties you specify - others remain unchanged.`,
   tickli project update abc123def456 -i`,
 		Args: cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			log.Warn().Msg("Update project is not implemented yet")
+			opts.projectID = args[0]
+			project, err := TickliClient.GetProject(opts.projectID)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("failed to fetch project %s", opts.projectID))
+			}
+			if cmd.Flags().Changed("name") {
+				project.Name = opts.name
+			}
+			if cmd.Flags().Changed("color") {
+				project.Color = opts.color
+			}
+			if cmd.Flags().Changed("view-mode") {
+				project.ViewMode = opts.viewMode
+			}
+			if cmd.Flags().Changed("kind") {
+				project.Kind = opts.kind
+			}
+			project, err = TickliClient.UpdateProject(project)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("failed to update project %s", opts.projectID))
+			}
+			fmt.Printf("Project %s updated successfully\n", project.ID)
+			fmt.Println(utils.GetProjectDescription(project))
 			return nil
 		},
 	}

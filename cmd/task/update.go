@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/sho0pi/tickli/internal/types"
+	"github.com/sho0pi/tickli/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -57,26 +58,37 @@ This command allows modifying title, content, priority, dates, and more.`,
 			if opts.projectID == "" {
 				opts.projectID = projectID
 			}
+			opts.taskID = args[0]
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			opts.taskID = args[0]
-			task := &types.Task{
-				ID:        opts.taskID,
-				ProjectID: opts.projectID,
+			task, err := TickliClient.GetTask(opts.projectID, opts.taskID)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("failed to get task with ID %s", opts.taskID))
 			}
-			//fmt.Println("task", task)
-			//if opts.content != "" {
-			//	task.Content = opts.content
-			//}
-			//if opts.description != "" {
-			//	task.Desc = opts.description
-			//}
-
-			task, err := TickliClient.UpdateTask(task)
+			if cmd.Flags().Changed("title") {
+				task.Title = opts.title
+			}
+			if cmd.Flags().Changed("content") {
+				task.Content = opts.content
+			}
+			if cmd.Flags().Changed("desc") {
+				task.Desc = opts.description
+			}
+			if cmd.Flags().Changed("priority") {
+				task.Priority = opts.priority
+			}
+			if cmd.Flags().Changed("tags") {
+				task.Tags = opts.tags
+			}
+			if cmd.Flags().Changed("all-day") {
+				task.IsAllDay = opts.allDay
+			}
+			task, err = TickliClient.UpdateTask(task)
 			if err != nil {
 				return errors.Wrap(err, fmt.Sprintf("failed to update task %s", opts.taskID))
 			}
-
+			fmt.Printf("Task %s updated successfully\n", task.ID)
+			fmt.Println(utils.GetTaskDescription(task, types.DefaultColor))
 			return nil
 		},
 	}
