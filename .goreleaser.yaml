@@ -16,7 +16,7 @@ builds:
       - arm64
     ldflags:
       - -s -w
-        -X 'github.com/sho0pi/tickli/cmd.clientID={{ .Env.CLIENT_ID }}' 
+        -X 'github.com/sho0pi/tickli/cmd.clientID={{ .Env.CLIENT_ID }}'
         -X 'github.com/sho0pi/tickli/cmd.clientSecret={{ .Env.CLIENT_SECRET }}'
         -X 'github.com/sho0pi/tickli/cmd.Version={{ .Version }}'
 
@@ -47,8 +47,7 @@ brews:
     homepage: https://github.com/sho0pi/tickli
     description: A simple CLI for managing your tasks.
     commit_author:
-        name: "sho0pi"
-        email: "itayblokh@gmail.com"
+      name: "sho0pi"
     install: |
       bin.install "tickli"
       bash_completion.install "completions/tickli.bash" => "tickli"

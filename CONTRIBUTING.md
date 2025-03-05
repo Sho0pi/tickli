@@ -44,7 +44,17 @@ By participating in this project, you agree to abide by our Code of Conduct:
 1. Install Go (1.24 or later recommended)
 2. Clone the repository
 3. Install dependencies: `go mod download`
-4. Build the project: `go build -o tickli main.go`
+4. Set up TickTick API Credentials
+    - Go to https://developer.ticktick.com/manage
+    - Create a new application
+    - Set the OAuth Redirect URL to: `http://localhost:8080`
+    - Copy your Client ID and Client Secret
+5. Create a `.env` file in the project root with your credentials:
+   ```
+   TICKTICK_CLIENT_ID="your_client_id_here"
+   TICKTICK_CLIENT_SECRET="your_client_secret_here"
+   ```
+6. Build the project: `go build -o tickli main.go`
 
 ## Coding Standards 📝
 
