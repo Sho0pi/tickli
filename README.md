@@ -22,7 +22,7 @@ Tickli is a powerful CLI tool that lets you manage your TickTick tasks and proje
 ### Using Homebrew
 
 ```bash
-brew tap sho0pi/brew
+brew tap sho0pi/homebrew-tap
 brew install tickli
 ```
 
