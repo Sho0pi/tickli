@@ -74,6 +74,15 @@ and tags. At minimum, a title is required unless using interactive mode.`,
 				IsAllDay: opts.allDay,
 			}
 
+			if opts.date != "" {
+				start, end, err := types.GetRangeFromString(opts.date)
+				if err != nil {
+					return errors.Wrap(err, "failed to parse date range")
+				}
+				task.StartDate = start
+				task.DueDate = end
+			}
+
 			task, err := TickliClient.CreateTask(task)
 			if err != nil {
 				return errors.Wrap(err, "failed to create task")

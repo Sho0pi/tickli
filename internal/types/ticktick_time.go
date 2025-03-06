@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/dustin/go-humanize"
+	"github.com/ijt/go-anytime"
 	"time"
 )
 
@@ -34,4 +35,12 @@ func (t TickTickTime) String() string {
 
 func (t TickTickTime) Humanize() string {
 	return humanize.Time(time.Time(t))
+}
+
+func GetRangeFromString(timeRange string) (start TickTickTime, end TickTickTime, err error) {
+	r, err := anytime.ParseRange(timeRange, time.Now())
+	if err != nil {
+		return TickTickTime{}, TickTickTime{}, err
+	}
+	return TickTickTime(r.Start()), TickTickTime(r.End()), nil
 }

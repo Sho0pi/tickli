@@ -61,10 +61,10 @@ brews:
       system "#{bin}/tickli version"
 
 
-scoop:
-  name: tickli
-  repository:
-    owner: sho0pi
-    name: scoop-bucket
-  homepage: https://github.com/sho0pi/tickli
-  description: A simple CLI for managing your tasks.
+scoops:
+  - name: tickli
+    repository:
+      owner: sho0pi
+      name: scoop-bucket
+    homepage: https://github.com/sho0pi/tickli
+    description: A simple CLI for managing your tasks.
