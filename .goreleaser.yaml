@@ -11,6 +11,7 @@ builds:
     goos:
       - linux
       - darwin
+      - windows
     goarch:
       - amd64
       - arm64
@@ -27,6 +28,9 @@ archives:
       - LICENSE
       - README.md
       - completions/*
+    format_overrides:
+      - goos: windows
+        format: zip
 
 checksum:
   name_template: "checksums.txt"
@@ -53,6 +57,14 @@ brews:
       bash_completion.install "completions/tickli.bash" => "tickli"
       zsh_completion.install "completions/tickli.zsh" => "_tickli"
       fish_completion.install "completions/tickli.fish" => "tickli.fish"
-#    test: |
-#      system "#{bin}/tickli --version"
+    test: |
+      system "#{bin}/tickli version"
 
+
+scoop:
+  name: tickli
+  repository:
+    owner: sho0pi
+    name: scoop-bucket
+  homepage: https://github.com/sho0pi/tickli
+  description: A simple CLI for managing your tasks.
