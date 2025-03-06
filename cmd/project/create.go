@@ -39,20 +39,20 @@ supports both direct parameter input and interactive mode.`,
   # Create a project in interactive mode
   tickli project create -i`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			project := &types.Project{
+			p := &types.Project{
 				Name:     opts.name,
 				Color:    opts.color,
 				ViewMode: opts.viewMode,
 				Kind:     opts.kind,
 			}
 
-			project, err := TickliClient.CreateProject(project)
+			p, err := TickliClient.CreateProject(p)
 			if err != nil {
-				return errors.Wrap(err, fmt.Sprintf("failed to create project %s", project.Name))
+				return errors.Wrap(err, fmt.Sprintf("failed to create project %s", p.Name))
 			}
 
-			fmt.Println(utils.GetProjectDescription(project))
-			fmt.Println(project.ID)
+			fmt.Println(utils.GetProjectDescription(p))
+			fmt.Println(p.ID)
 			return nil
 		},
 	}

@@ -11,7 +11,6 @@ type Kind string
 const (
 	KindTask    Kind = "TASK"
 	KindNote    Kind = "NOTE"
-	KindInbox   Kind = "INBOX"
 	KindUnknown Kind = "UNKNOWN"
 )
 
@@ -28,7 +27,7 @@ func (k *Kind) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	switch kind {
-	case string(KindTask), string(KindNote), string(KindInbox), string(KindUnknown):
+	case string(KindTask), string(KindNote), string(KindUnknown):
 		*k = Kind(kind)
 	default:
 		*k = KindUnknown
@@ -46,8 +45,6 @@ func (k Kind) String() string {
 		return "📝Task"
 	case KindNote:
 		return "📖Note"
-	case KindInbox:
-		return "📥Inbox"
 	default:
 		return "🔧Unknown"
 	}
@@ -55,7 +52,7 @@ func (k Kind) String() string {
 
 func (k *Kind) Set(s string) error {
 	switch s {
-	case string(KindTask), string(KindNote), string(KindInbox):
+	case string(KindTask), string(KindNote):
 		*k = Kind(s)
 	default:
 		return fmt.Errorf("invalid project kind %q", s)

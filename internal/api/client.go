@@ -81,7 +81,7 @@ func (c *Client) ListProjects() ([]*types.Project, error) {
 }
 
 func (c *Client) GetProject(id string) (*types.Project, error) {
-	if id == "inbox" {
+	if id == types.InboxProject.ID {
 		return &types.InboxProject, nil
 	}
 	var project *types.Project

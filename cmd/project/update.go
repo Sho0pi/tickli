@@ -35,30 +35,32 @@ Changes only the properties you specify - others remain unchanged.`,
   # Update interactively
   tickli project update abc123def456 -i`,
 		Args: cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		PreRun: func(cmd *cobra.Command, args []string) {
 			opts.projectID = args[0]
-			project, err := TickliClient.GetProject(opts.projectID)
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			p, err := TickliClient.GetProject(opts.projectID)
 			if err != nil {
 				return errors.Wrap(err, fmt.Sprintf("failed to fetch project %s", opts.projectID))
 			}
 			if cmd.Flags().Changed("name") {
-				project.Name = opts.name
+				p.Name = opts.name
 			}
 			if cmd.Flags().Changed("color") {
-				project.Color = opts.color
+				p.Color = opts.color
 			}
 			if cmd.Flags().Changed("view-mode") {
-				project.ViewMode = opts.viewMode
+				p.ViewMode = opts.viewMode
 			}
 			if cmd.Flags().Changed("kind") {
-				project.Kind = opts.kind
+				p.Kind = opts.kind
 			}
-			project, err = TickliClient.UpdateProject(project)
+			p, err = TickliClient.UpdateProject(p)
 			if err != nil {
 				return errors.Wrap(err, fmt.Sprintf("failed to update project %s", opts.projectID))
 			}
-			fmt.Printf("Project %s updated successfully\n", project.ID)
-			fmt.Println(utils.GetProjectDescription(project))
+			fmt.Printf("Project %s updated successfully\n", p.ID)
+			fmt.Println(utils.GetProjectDescription(p))
 			return nil
 		},
 	}

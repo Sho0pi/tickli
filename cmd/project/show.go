@@ -23,7 +23,7 @@ func newShowCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:     "show [project-id]",
-		Aliases: []string{"info"},
+		Aliases: []string{"info", "get"},
 		Short:   "Show details of a project",
 		Long: `Display detailed information about a specific project.
     
@@ -41,8 +41,7 @@ Can include associated tasks and switch between output formats.`,
   # Output in JSON format
   tickli project show -o json`,
 		Args: cobra.MaximumNArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			// Determine which project to show
+		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				opts.projectID = args[0]
 			} else {
@@ -52,7 +51,9 @@ Can include associated tasks and switch between output formats.`,
 				}
 				opts.projectID = cfg.DefaultProjectID
 			}
-
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if opts.withTasks {
 				projectData, err := TickliClient.GetProjectWithTasks(opts.projectID)
 				if err != nil {

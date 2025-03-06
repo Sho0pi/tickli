@@ -13,6 +13,7 @@ import (
 
 type showOptions struct {
 	projectID string
+	taskID    string
 	output    types.OutputFormat
 }
 
@@ -22,7 +23,7 @@ func newShowCommand() *cobra.Command {
 	}
 	cmd := &cobra.Command{
 		Use:     "show <task-id>",
-		Aliases: []string{"info"},
+		Aliases: []string{"info", "get"},
 		Short:   "Display detailed information about a task",
 		Long: `Show complete information about a specific task identified by its ID.
     
@@ -39,17 +40,16 @@ You can choose between human-readable output or machine-readable JSON.`,
 		Args: cobra.ExactArgs(1),
 		PreRun: func(cmd *cobra.Command, args []string) {
 			opts.projectID = projectID
+			opts.taskID = args[0]
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			taskId := args[0]
-
-			task, err := TickliClient.GetTask(projectID, taskId)
+			task, err := TickliClient.GetTask(opts.projectID, opts.taskID)
 			if err != nil {
 				return err
 			}
-			if task.ID != taskId {
-				log.Warn().Str("task-id", taskId).Str("project-id", projectID).Msg("task not found")
-				return fmt.Errorf("task %s not found for porject %s", taskId, projectID)
+			if task.ID != opts.taskID {
+				log.Warn().Str("task-id", opts.taskID).Str("project-id", opts.projectID).Msg("task not found")
+				return fmt.Errorf("task %s not found for porject %s", opts.taskID, opts.projectID)
 			}
 			switch opts.output {
 			case types.OutputSimple:

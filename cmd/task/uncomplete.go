@@ -7,6 +7,7 @@ import (
 
 type uncompleteOptions struct {
 	projectID string
+	taskID    string
 }
 
 func newUncompleteCommand() *cobra.Command {
@@ -26,6 +27,7 @@ but need to be worked on again.`,
 		Args: cobra.ExactArgs(1),
 		PreRun: func(cmd *cobra.Command, args []string) {
 			opts.projectID = projectID
+			opts.taskID = args[0]
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Warn().Msg("uncomplete command not implemented yet")

@@ -8,6 +8,7 @@ import (
 
 type deleteOptions struct {
 	projectID string
+	taskID    string
 	force     bool
 }
 
@@ -32,12 +33,12 @@ the deletion unless the --force flag is used.`,
 		Args: cobra.ExactArgs(1),
 		PreRun: func(cmd *cobra.Command, args []string) {
 			opts.projectID = projectID
+			opts.taskID = args[0]
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			taskID := args[0]
 			if !opts.force {
 				var confirm string
-				fmt.Printf("Are you sure you want to delete the task %s? (y/N): ", taskID)
+				fmt.Printf("Are you sure you want to delete the task %s? (y/N): ", opts.taskID)
 				fmt.Scanln(&confirm)
 				if confirm != "y" && confirm != "Y" {
 					fmt.Println("Deletion aborted")
@@ -45,12 +46,12 @@ the deletion unless the --force flag is used.`,
 				}
 			}
 
-			err := TickliClient.DeleteTask(opts.projectID, taskID)
+			err := TickliClient.DeleteTask(opts.projectID, opts.taskID)
 			if err != nil {
-				return errors.Wrap(err, fmt.Sprintf("failed to delete task %s", taskID))
+				return errors.Wrap(err, fmt.Sprintf("failed to delete task %s", opts.taskID))
 			}
 
-			fmt.Printf("Task %s deleted\n", taskID)
+			fmt.Printf("Task %s deleted\n", opts.taskID)
 
 			return nil
 		},

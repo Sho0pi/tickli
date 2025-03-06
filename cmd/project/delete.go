@@ -26,8 +26,10 @@ the deletion unless the --force flag is used.`,
   # Force delete without confirmation
   tickli project delete abc123def456 --force`,
 		Args: cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		PreRun: func(cmd *cobra.Command, args []string) {
 			opts.projectID = args[0]
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if !opts.force {
 				var confirm string
 				fmt.Printf("Are you sure you want to delete the project %s? (y/N): ", opts.projectID)

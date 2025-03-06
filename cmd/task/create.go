@@ -61,7 +61,7 @@ and tags. At minimum, a title is required unless using interactive mode.`,
 			opts.projectID = projectID
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			task := &types.Task{
+			t := &types.Task{
 				ProjectID: opts.projectID,
 				Title:     opts.title,
 				Content:   opts.content,
@@ -78,16 +78,16 @@ and tags. At minimum, a title is required unless using interactive mode.`,
 				if err != nil {
 					return errors.Wrap(err, "failed to parse date range")
 				}
-				task.StartDate = start
-				task.DueDate = end
+				t.StartDate = start
+				t.DueDate = end
 			}
 
-			task, err := TickliClient.CreateTask(task)
+			t, err := TickliClient.CreateTask(t)
 			if err != nil {
 				return errors.Wrap(err, "failed to create task")
 			}
 
-			fmt.Println(task.ID)
+			fmt.Println(t.ID)
 			return nil
 		},
 	}

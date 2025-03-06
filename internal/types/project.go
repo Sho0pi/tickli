@@ -5,11 +5,11 @@ import "github.com/sho0pi/tickli/internal/types/project"
 // InboxProject the Inbox project representation (cause is not returned by the api)
 var InboxProject = Project{
 	ID:        "inbox",
-	Name:      "inbox",
+	Name:      "📥Inbox",
 	Color:     project.DefaultColor,
 	SortOrder: 0,
 	Closed:    false,
-	Kind:      project.KindInbox,
+	Kind:      project.KindTask,
 	ViewMode:  project.ViewModeList,
 }
 

@@ -62,7 +62,7 @@ This command allows modifying title, content, priority, dates, and more.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			t, err := TickliClient.GetTask(opts.projectID, opts.taskID)
 			if err != nil {
-				return errors.Wrap(err, fmt.Sprintf("failed to get t with ID %s", opts.taskID))
+				return errors.Wrap(err, fmt.Sprintf("failed to get task with ID %s", opts.taskID))
 			}
 			if cmd.Flags().Changed("title") {
 				t.Title = opts.title
@@ -84,7 +84,7 @@ This command allows modifying title, content, priority, dates, and more.`,
 			}
 			t, err = TickliClient.UpdateTask(t)
 			if err != nil {
-				return errors.Wrap(err, fmt.Sprintf("failed to update t %s", opts.taskID))
+				return errors.Wrap(err, fmt.Sprintf("failed to update task %s", opts.taskID))
 			}
 			fmt.Printf("Task %s updated successfully\n", t.ID)
 			fmt.Println(utils.GetTaskDescription(t, project.DefaultColor))

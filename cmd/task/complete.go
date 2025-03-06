@@ -9,6 +9,7 @@ import (
 
 type completeOptions struct {
 	projectID string
+	taskID    string
 }
 
 func newCompleteCmd() *cobra.Command {
@@ -28,15 +29,15 @@ but will no longer appear in default listings unless using the --all flag.`,
 		Args: cobra.ExactArgs(1),
 		PreRun: func(cmd *cobra.Command, args []string) {
 			opts.projectID = projectID
+			opts.taskID = args[0]
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			taskID := args[0]
-			err := TickliClient.CompleteTask(opts.projectID, taskID)
+			err := TickliClient.CompleteTask(opts.projectID, opts.taskID)
 			if err != nil {
 				return errors.Wrap(err, "failed to complete task")
 			}
 
-			fmt.Printf("%s Task %s completed\n", color.Green.Sprint("☑"), taskID)
+			fmt.Printf("%s Task %s completed\n", color.Green.Sprint("☑"), opts.taskID)
 			return nil
 		},
 	}
