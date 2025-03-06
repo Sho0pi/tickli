@@ -27,9 +27,7 @@ but will no longer appear in default listings unless using the --all flag.`,
   tickli task complete abc123def456 --project-id xyz789`,
 		Args: cobra.ExactArgs(1),
 		PreRun: func(cmd *cobra.Command, args []string) {
-			if opts.projectID == "" {
-				opts.projectID = projectID
-			}
+			opts.projectID = projectID
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			taskID := args[0]
@@ -43,6 +41,5 @@ but will no longer appear in default listings unless using the --all flag.`,
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.projectID, "project-id", "i", "", "Project containing the task (if not in current project)")
 	return cmd
 }

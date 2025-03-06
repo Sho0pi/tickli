@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/sho0pi/tickli/internal/types"
+	"github.com/sho0pi/tickli/internal/types/task"
 	"github.com/spf13/cobra"
 )
 
@@ -11,7 +12,7 @@ type createOptions struct {
 	title       string
 	content     string
 	description string
-	priority    types.TaskPriority
+	priority    task.Priority
 	tags        []string
 
 	// time specific vars
@@ -57,13 +58,11 @@ and tags. At minimum, a title is required unless using interactive mode.`,
   tickli task create -i`,
 		Args: cobra.NoArgs,
 		PreRun: func(cmd *cobra.Command, args []string) {
-			if opts.projectID != "" {
-				projectID = opts.projectID
-			}
+			opts.projectID = projectID
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			task := &types.Task{
-				ProjectID: projectID,
+				ProjectID: opts.projectID,
 				Title:     opts.title,
 				Content:   opts.content,
 				Desc:      opts.description,
@@ -93,7 +92,6 @@ and tags. At minimum, a title is required unless using interactive mode.`,
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.projectID, "project-id", "", "Create in a specific project instead of the current one")
 	cmd.Flags().StringVarP(&opts.title, "title", "t", "", "Title of the task (required)")
 	cmd.MarkFlagRequired("title")
 	cmd.Flags().StringVarP(&opts.content, "content", "c", "", "Additional details about the task")
@@ -108,7 +106,7 @@ and tags. At minimum, a title is required unless using interactive mode.`,
 	cmd.Flags().StringSliceVar(&opts.tags, "tags", []string{}, "Apply tags to categorize the task (comma-separated)")
 	cmd.Flags().StringVar(&opts.repeat, "repeat", "", "Recurring rule (e.g., 'daily', 'weekly on monday')")
 	cmd.Flags().VarP(&opts.priority, "priority", "p", "Task importance: none, low, medium, high (default: none)")
-	_ = cmd.RegisterFlagCompletionFunc("priority", types.RegisterTaskPriorityCompletions)
+	_ = cmd.RegisterFlagCompletionFunc("priority", task.PriorityCompletionFunc)
 	cmd.Flags().BoolVarP(&opts.interactive, "interactive", "i", false, "Create task by answering prompts")
 
 	return cmd

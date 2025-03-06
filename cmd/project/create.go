@@ -4,23 +4,24 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/sho0pi/tickli/internal/types"
+	"github.com/sho0pi/tickli/internal/types/project"
 	"github.com/sho0pi/tickli/internal/utils"
 	"github.com/spf13/cobra"
 )
 
 type createProjectOptions struct {
 	name        string
-	color       types.ProjectColor
-	viewMode    types.ViewMode
-	kind        types.ProjectKind
+	color       project.Color
+	viewMode    project.ViewMode
+	kind        project.Kind
 	interactive bool
 }
 
 func newCreateProjectCommand() *cobra.Command {
 	opts := &createProjectOptions{
-		kind:     types.KindTask,
-		viewMode: types.ViewModeList,
-		color:    types.DefaultColor,
+		kind:     project.KindTask,
+		viewMode: project.ViewModeList,
+		color:    project.DefaultColor,
 	}
 	cmd := &cobra.Command{
 		Use:   "create [project-name]",
@@ -59,9 +60,9 @@ supports both direct parameter input and interactive mode.`,
 	_ = cmd.MarkFlagRequired("name")
 	cmd.Flags().VarP(&opts.color, "color", "c", "Color for the project (hex format, e.g., '#F18181')")
 	cmd.Flags().Var(&opts.viewMode, "view-mode", "How to display tasks: list, kanban, or timeline (default: list)")
-	_ = cmd.RegisterFlagCompletionFunc("view-mode", types.RegisterViewModeCompletions)
+	_ = cmd.RegisterFlagCompletionFunc("view-mode", project.ViewModeCompletionFunc)
 	cmd.Flags().Var(&opts.kind, "kind", "Project type: TASK for action items or NOTE for information (default: TASK)")
-	_ = cmd.RegisterFlagCompletionFunc("kind", types.RegisterProjectKindCompletions)
+	_ = cmd.RegisterFlagCompletionFunc("kind", project.KindCompletionFunc)
 	cmd.Flags().BoolVarP(&opts.interactive, "interactive", "i", false, "Create project by answering prompts instead of using flags")
 
 	return cmd

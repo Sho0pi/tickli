@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/rs/zerolog/log"
 	"github.com/sho0pi/tickli/internal/types"
+	"github.com/sho0pi/tickli/internal/types/project"
+	"github.com/sho0pi/tickli/internal/types/task"
 	"github.com/sho0pi/tickli/internal/utils"
 	"github.com/spf13/cobra"
 	"slices"
@@ -13,23 +15,23 @@ import (
 type listOptions struct {
 	all       bool
 	verbose   bool
-	priority  types.TaskPriority
+	priority  task.Priority
 	dueDate   string
 	tag       string
 	projectID string
 }
 
-func fetchProjectColor(projectID string) types.ProjectColor {
-	project, err := TickliClient.GetProject(projectID)
+func fetchProjectColor(projectID string) project.Color {
+	p, err := TickliClient.GetProject(projectID)
 	if err != nil {
-		log.Warn().Err(err).Msg("failed to get project color, using default color")
-		return types.DefaultColor
+		log.Warn().Err(err).Msg("failed to get p color, using default color")
+		return project.DefaultColor
 	}
-	return project.Color
+	return p.Color
 }
 
-func fetchProjectColorAsync(ctx context.Context, projectID string) <-chan types.ProjectColor {
-	colorChan := make(chan types.ProjectColor, 1)
+func fetchProjectColorAsync(ctx context.Context, projectID string) <-chan project.Color {
+	colorChan := make(chan project.Color, 1)
 
 	go func() {
 		defer close(colorChan)
@@ -134,9 +136,7 @@ tags, and due date. Results are displayed in an interactive selector.`,
   tickli task list --project-id abc123def456`,
 		Args: cobra.NoArgs,
 		PreRun: func(cmd *cobra.Command, args []string) {
-			if opts.projectID != "" {
-				projectID = opts.projectID
-			}
+			opts.projectID = projectID
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx, cancel := context.WithCancel(context.Background())
@@ -146,7 +146,7 @@ tags, and due date. Results are displayed in an interactive selector.`,
 			taskChan := fetchAndFilterTasksAsync(ctx, projectID, opts)
 
 			// Wait for both operations to complete
-			var projectColor types.ProjectColor
+			var projectColor project.Color
 			var filteredTasks []*types.Task
 
 			// Get the task results
@@ -160,29 +160,28 @@ tags, and due date. Results are displayed in an interactive selector.`,
 			// Get the project color
 			select {
 			case <-ctx.Done():
-				projectColor = types.DefaultColor
+				projectColor = project.DefaultColor
 			case color, ok := <-colorChan:
 				if !ok {
-					projectColor = types.DefaultColor
+					projectColor = project.DefaultColor
 				} else {
 					projectColor = color
 				}
 			}
 
-			task, err := utils.FuzzySelectTask(filteredTasks, projectColor, "")
+			t, err := utils.FuzzySelectTask(filteredTasks, projectColor, "")
 			if err != nil {
 				log.Fatal().Err(err).Msg("failed to select task")
 			}
 
-			fmt.Println(utils.GetTaskDescription(task, projectColor))
+			fmt.Println(utils.GetTaskDescription(t, projectColor))
 			return nil
 		},
 	}
-	cmd.Flags().StringVar(&opts.projectID, "project-id", "", "List tasks from a specific project instead of the current one")
 	cmd.Flags().BoolVarP(&opts.all, "all", "a", false, "Include completed tasks in the results")
 	cmd.Flags().StringVarP(&opts.tag, "tag", "t", "", "Only show tasks with this specific tag")
 	cmd.Flags().VarP(&opts.priority, "priority", "p", "Only show tasks with this priority level or higher")
-	_ = cmd.RegisterFlagCompletionFunc("priority", types.RegisterTaskPriorityCompletions)
+	_ = cmd.RegisterFlagCompletionFunc("priority", task.PriorityCompletionFunc)
 	cmd.Flags().StringVar(&opts.dueDate, "due", "", "Filter by due date (today, tomorrow, this-week, overdue)")
 	cmd.Flags().BoolVarP(&opts.verbose, "verbose", "v", false, "Show more details for each task in the list")
 
@@ -190,9 +189,9 @@ tags, and due date. Results are displayed in an interactive selector.`,
 }
 func Filter(tasks []*types.Task, predicate func(task types.Task) bool) []*types.Task {
 	var result []*types.Task
-	for _, task := range tasks {
-		if predicate(*task) {
-			result = append(result, task)
+	for _, t := range tasks {
+		if predicate(*t) {
+			result = append(result, t)
 		}
 	}
 	return result

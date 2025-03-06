@@ -3,7 +3,8 @@ package task
 import (
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/sho0pi/tickli/internal/types"
+	"github.com/sho0pi/tickli/internal/types/project"
+	"github.com/sho0pi/tickli/internal/types/task"
 	"github.com/sho0pi/tickli/internal/utils"
 	"github.com/spf13/cobra"
 )
@@ -15,7 +16,7 @@ type updateOptions struct {
 	title       string
 	content     string
 	description string
-	priority    types.TaskPriority
+	priority    task.Priority
 	tags        []string
 
 	// time specific vars
@@ -55,45 +56,42 @@ This command allows modifying title, content, priority, dates, and more.`,
   tickli task update abc123def456 -i`,
 		Args: cobra.ExactArgs(1),
 		PreRun: func(cmd *cobra.Command, args []string) {
-			if opts.projectID == "" {
-				opts.projectID = projectID
-			}
+			opts.projectID = projectID
 			opts.taskID = args[0]
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			task, err := TickliClient.GetTask(opts.projectID, opts.taskID)
+			t, err := TickliClient.GetTask(opts.projectID, opts.taskID)
 			if err != nil {
-				return errors.Wrap(err, fmt.Sprintf("failed to get task with ID %s", opts.taskID))
+				return errors.Wrap(err, fmt.Sprintf("failed to get t with ID %s", opts.taskID))
 			}
 			if cmd.Flags().Changed("title") {
-				task.Title = opts.title
+				t.Title = opts.title
 			}
 			if cmd.Flags().Changed("content") {
-				task.Content = opts.content
+				t.Content = opts.content
 			}
 			if cmd.Flags().Changed("desc") {
-				task.Desc = opts.description
+				t.Desc = opts.description
 			}
 			if cmd.Flags().Changed("priority") {
-				task.Priority = opts.priority
+				t.Priority = opts.priority
 			}
 			if cmd.Flags().Changed("tags") {
-				task.Tags = opts.tags
+				t.Tags = opts.tags
 			}
 			if cmd.Flags().Changed("all-day") {
-				task.IsAllDay = opts.allDay
+				t.IsAllDay = opts.allDay
 			}
-			task, err = TickliClient.UpdateTask(task)
+			t, err = TickliClient.UpdateTask(t)
 			if err != nil {
-				return errors.Wrap(err, fmt.Sprintf("failed to update task %s", opts.taskID))
+				return errors.Wrap(err, fmt.Sprintf("failed to update t %s", opts.taskID))
 			}
-			fmt.Printf("Task %s updated successfully\n", task.ID)
-			fmt.Println(utils.GetTaskDescription(task, types.DefaultColor))
+			fmt.Printf("Task %s updated successfully\n", t.ID)
+			fmt.Println(utils.GetTaskDescription(t, project.DefaultColor))
 			return nil
 		},
 	}
 
-	cmd.Flags().StringVar(&opts.projectID, "project-id", "", "Specific project instead of the current one")
 	cmd.Flags().StringVarP(&opts.title, "title", "t", "", "Change the task title")
 	cmd.Flags().StringVarP(&opts.content, "content", "c", "", "Change or add content/description")
 	cmd.Flags().StringVarP(&opts.description, "desc", "d", "", "New description (for checklist)")
@@ -105,7 +103,7 @@ This command allows modifying title, content, priority, dates, and more.`,
 	cmd.Flags().StringSliceVar(&opts.reminders, "reminders", []string{}, "Set reminders (e.g., '10m', '1h before')")
 	cmd.Flags().StringVar(&opts.repeat, "repeat", "", "New recurring rule (e.g., 'daily', 'weekly on monday')")
 	cmd.Flags().Var(&opts.priority, "priority", "Change task importance: none, low, medium, high")
-	_ = cmd.RegisterFlagCompletionFunc("priority", types.RegisterTaskPriorityCompletions)
+	_ = cmd.RegisterFlagCompletionFunc("priority", task.PriorityCompletionFunc)
 	cmd.Flags().BoolVarP(&opts.interactive, "interactive", "i", false, "Update task by answering prompts")
 
 	return cmd

@@ -1,4 +1,4 @@
-package types
+package project
 
 import (
 	"encoding/json"
@@ -6,38 +6,41 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type ProjectKind string
+type Kind string
 
 const (
-	KindTask    ProjectKind = "TASK"
-	KindNote    ProjectKind = "NOTE"
-	KindInbox   ProjectKind = "INBOX"
-	KindUnknown ProjectKind = "UNKNOWN"
+	KindTask    Kind = "TASK"
+	KindNote    Kind = "NOTE"
+	KindInbox   Kind = "INBOX"
+	KindUnknown Kind = "UNKNOWN"
 )
 
-func RegisterProjectKindCompletions(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	return []string{string(KindTask), string(KindNote)}, cobra.ShellCompDirectiveDefault
+var KindCompletion = []cobra.Completion{
+	cobra.CompletionWithDesc(string(KindTask), "Task project"),
+	cobra.CompletionWithDesc(string(KindNote), "Note project"),
 }
 
-func (k *ProjectKind) UnmarshalJSON(data []byte) error {
+var KindCompletionFunc = cobra.FixedCompletions(KindCompletion, cobra.ShellCompDirectiveNoFileComp)
+
+func (k *Kind) UnmarshalJSON(data []byte) error {
 	var kind string
 	if err := json.Unmarshal(data, &kind); err != nil {
 		return err
 	}
 	switch kind {
 	case string(KindTask), string(KindNote), string(KindInbox), string(KindUnknown):
-		*k = ProjectKind(kind)
+		*k = Kind(kind)
 	default:
 		*k = KindUnknown
 	}
 	return nil
 }
 
-func (k ProjectKind) MarshalJSON() ([]byte, error) {
+func (k Kind) MarshalJSON() ([]byte, error) {
 	return json.Marshal(string(k))
 }
 
-func (k ProjectKind) String() string {
+func (k Kind) String() string {
 	switch k {
 	case KindTask:
 		return "📝Task"
@@ -50,16 +53,16 @@ func (k ProjectKind) String() string {
 	}
 }
 
-func (k *ProjectKind) Set(s string) error {
+func (k *Kind) Set(s string) error {
 	switch s {
 	case string(KindTask), string(KindNote), string(KindInbox):
-		*k = ProjectKind(s)
+		*k = Kind(s)
 	default:
 		return fmt.Errorf("invalid project kind %q", s)
 	}
 	return nil
 }
 
-func (k *ProjectKind) Type() string {
+func (k *Kind) Type() string {
 	return "ProjectKind"
 }

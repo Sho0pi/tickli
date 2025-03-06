@@ -93,6 +93,6 @@ Can include associated tasks and switch between output formats.`,
 
 	cmd.Flags().BoolVar(&opts.withTasks, "with-tasks", false, "Include all tasks belonging to this project")
 	cmd.Flags().VarP(&opts.output, "output", "o", "Format for displaying results: simple (human-readable) or json (machine-readable)")
-	_ = cmd.RegisterFlagCompletionFunc("output", types.RegisterOutputFormatCompletions)
+	_ = cmd.RegisterFlagCompletionFunc("output", types.OutputFormatCompletionFunc)
 	return cmd
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/ktr0731/go-fuzzyfinder"
 	"github.com/sho0pi/tickli/internal/types"
+	"github.com/sho0pi/tickli/internal/types/project"
 )
 
 func GetProjectDescription(project *types.Project) string {
@@ -38,7 +39,7 @@ Tasks:`,
 	return description
 }
 
-func GetTaskDescription(task *types.Task, projectColor types.ProjectColor) string {
+func GetTaskDescription(task *types.Task, projectColor project.Color) string {
 	projectLine := projectColor.Sprint("----------------------")
 
 	description := fmt.Sprintf(`
@@ -100,7 +101,7 @@ func FuzzySelectProject(projects []*types.Project, query string) (*types.Project
 	return projects[idx], nil
 }
 
-func FuzzySelectTask(tasks []*types.Task, projectColor types.ProjectColor, query string) (*types.Task, error) {
+func FuzzySelectTask(tasks []*types.Task, projectColor project.Color, query string) (*types.Task, error) {
 	idx, err := fuzzyfinder.Find(
 		tasks,
 		func(i int) string {

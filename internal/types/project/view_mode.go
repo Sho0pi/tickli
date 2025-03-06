@@ -1,4 +1,4 @@
-package types
+package project
 
 import (
 	"encoding/json"
@@ -14,9 +14,13 @@ const (
 	ViewModeTimeline ViewMode = "timeline"
 )
 
-func RegisterViewModeCompletions(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	return []string{string(ViewModeList), string(ViewModeTimeline), string(ViewModeKanban)}, cobra.ShellCompDirectiveDefault
+var ViewModeCompletion = []cobra.Completion{
+	cobra.CompletionWithDesc(string(ViewModeList), "List view mode"),
+	cobra.CompletionWithDesc(string(ViewModeKanban), "Kanban view mode"),
+	cobra.CompletionWithDesc(string(ViewModeTimeline), "Timeline view mode"),
 }
+
+var ViewModeCompletionFunc = cobra.FixedCompletions(ViewModeCompletion, cobra.ShellCompDirectiveNoFileComp)
 
 func (vm *ViewMode) UnmarshalJSON(data []byte) error {
 	var viewMode string

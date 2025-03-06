@@ -1,5 +1,7 @@
 package types
 
+import "github.com/sho0pi/tickli/internal/types/task"
+
 type Task struct {
 	ID            string          `json:"id"`
 	ProjectID     string          `json:"projectId"`
@@ -10,12 +12,12 @@ type Task struct {
 	Desc          string          `json:"desc"`
 	DueDate       TickTickTime    `json:"dueDate,omitzero"`
 	Items         []ChecklistItem `json:"items"`
-	Priority      TaskPriority    `json:"priority"`
+	Priority      task.Priority   `json:"priority"`
 	Reminders     []string        `json:"reminders"`
 	RepeatFlag    string          `json:"repeatFlag"`
 	SortOrder     int64           `json:"sortOrder"`
 	StartDate     TickTickTime    `json:"startDate,omitzero"`
-	Status        TaskStatus      `json:"status"`
+	Status        task.Status     `json:"status"`
 	TimeZone      string          `json:"timeZone"`
 	Tags          []string        `json:"tags"`
 }

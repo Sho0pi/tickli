@@ -1,4 +1,4 @@
-package types
+package project
 
 import (
 	"encoding/json"
@@ -8,11 +8,11 @@ import (
 	"strings"
 )
 
-var DefaultColor = ProjectColor(color.HEX("#3694FE"))
+var DefaultColor = Color(color.HEX("#3694FE"))
 
-type ProjectColor color.RGBColor
+type Color color.RGBColor
 
-func (c *ProjectColor) UnmarshalJSON(data []byte) error {
+func (c *Color) UnmarshalJSON(data []byte) error {
 
 	var colorStr string
 	if err := json.Unmarshal(data, &colorStr); err != nil {
@@ -22,24 +22,24 @@ func (c *ProjectColor) UnmarshalJSON(data []byte) error {
 	if colorStr == "" {
 		*c = DefaultColor
 	} else {
-		*c = ProjectColor(color.HEX(colorStr))
+		*c = Color(color.HEX(colorStr))
 	}
 	return nil
 }
 
-func (c ProjectColor) MarshalJSON() ([]byte, error) {
+func (c Color) MarshalJSON() ([]byte, error) {
 	return json.Marshal(c.String())
 }
 
-func (c ProjectColor) Sprint(a ...any) string {
+func (c Color) Sprint(a ...any) string {
 	return color.RGBColor(c).Sprint(a...)
 }
 
-func (c ProjectColor) String() string {
+func (c Color) String() string {
 	return "#" + strings.ToUpper(color.RGBColor(c).Hex())
 }
 
-func (c *ProjectColor) Set(s string) error {
+func (c *Color) Set(s string) error {
 	// Validate the hex color format
 	s = strings.TrimSpace(s)
 
@@ -54,10 +54,10 @@ func (c *ProjectColor) Set(s string) error {
 		s = "#" + s
 	}
 
-	*c = ProjectColor(color.HEX(s))
+	*c = Color(color.HEX(s))
 	return nil
 }
 
-func (c *ProjectColor) Type() string {
+func (c *Color) Type() string {
 	return "ProjectColor"
 }

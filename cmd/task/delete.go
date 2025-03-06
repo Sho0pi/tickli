@@ -31,9 +31,7 @@ the deletion unless the --force flag is used.`,
   tickli task delete abc123def456 --project-id xyz789`,
 		Args: cobra.ExactArgs(1),
 		PreRun: func(cmd *cobra.Command, args []string) {
-			if opts.projectID == "" {
-				opts.projectID = projectID
-			}
+			opts.projectID = projectID
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			taskID := args[0]
@@ -58,7 +56,6 @@ the deletion unless the --force flag is used.`,
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.projectID, "project-id", "i", "", "Project containing the task (if not in current project)")
 	cmd.Flags().BoolVarP(&opts.force, "force", "f", false, "Skip confirmation prompt and delete immediately")
 
 	return cmd

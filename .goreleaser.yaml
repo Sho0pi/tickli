@@ -22,7 +22,7 @@ builds:
         -X 'github.com/sho0pi/tickli/cmd.Version={{ .Version }}'
 
 archives:
-  - format: tar.gz
+  - formats: [tar.gz]
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     files:
       - LICENSE
@@ -30,12 +30,13 @@ archives:
       - completions/*
     format_overrides:
       - goos: windows
-        format: zip
+        formats: [zip]
 
 checksum:
   name_template: "checksums.txt"
 
 changelog:
+  use: github
   sort: asc
   filters:
     exclude:

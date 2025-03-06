@@ -12,9 +12,12 @@ const (
 	OutputJSON   OutputFormat = "json"
 )
 
-func RegisterOutputFormatCompletions(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	return []string{string(OutputJSON), string(OutputSimple)}, cobra.ShellCompDirectiveDefault
+var OutputFormatCompletion = []cobra.Completion{
+	cobra.CompletionWithDesc("simple", "Simple output format"),
+	cobra.CompletionWithDesc("json", "JSON output format"),
 }
+
+var OutputFormatCompletionFunc = cobra.FixedCompletions(OutputFormatCompletion, cobra.ShellCompDirectiveNoFileComp)
 
 func (o *OutputFormat) Set(value string) error {
 	switch OutputFormat(value) {

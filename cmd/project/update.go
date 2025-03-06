@@ -3,7 +3,7 @@ package project
 import (
 	"fmt"
 	"github.com/pkg/errors"
-	"github.com/sho0pi/tickli/internal/types"
+	"github.com/sho0pi/tickli/internal/types/project"
 	"github.com/sho0pi/tickli/internal/utils"
 	"github.com/spf13/cobra"
 )
@@ -11,9 +11,9 @@ import (
 type updateProjectOptions struct {
 	projectID   string
 	name        string
-	color       types.ProjectColor
-	viewMode    types.ViewMode
-	kind        types.ProjectKind
+	color       project.Color
+	viewMode    project.ViewMode
+	kind        project.Kind
 	interactive bool
 }
 
@@ -66,9 +66,9 @@ Changes only the properties you specify - others remain unchanged.`,
 	cmd.Flags().StringVarP(&opts.name, "name", "n", "", "Change the project name")
 	cmd.Flags().VarP(&opts.color, "color", "c", "Change the project color (hex format, e.g., '#F18181')")
 	cmd.Flags().Var(&opts.viewMode, "view-mode", "Change how tasks are displayed: list, kanban, or timeline")
-	_ = cmd.RegisterFlagCompletionFunc("view-mode", types.RegisterViewModeCompletions)
+	_ = cmd.RegisterFlagCompletionFunc("view-mode", project.ViewModeCompletionFunc)
 	cmd.Flags().Var(&opts.kind, "kind", "Change project type: TASK or NOTE")
-	_ = cmd.RegisterFlagCompletionFunc("kind", types.RegisterProjectKindCompletions)
+	_ = cmd.RegisterFlagCompletionFunc("kind", project.KindCompletionFunc)
 	cmd.Flags().BoolVarP(&opts.interactive, "interactive", "i", false, "Update project by answering prompts instead of using flags")
 
 	return cmd

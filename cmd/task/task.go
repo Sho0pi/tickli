@@ -32,15 +32,7 @@ specify a different project with the --project-id flag.`,
   # Complete a task
   tickli task complete abc123def456`,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-
-		token, err := config.LoadToken()
-		if err != nil || token == "" {
-			log.Fatal().Msg("Please run 'tickli init' first")
-		}
-
-		// Init the TickliClient
-		TickliClient = api.NewClient(token)
-
+		loadClient()
 		if projectID == "" {
 			cfg, err := config.Load()
 			if err != nil {
@@ -55,7 +47,20 @@ specify a different project with the --project-id flag.`,
 	},
 }
 
+func loadClient() *api.Client {
+	token, err := config.LoadToken()
+	if err != nil || token == "" {
+		log.Fatal().Msg("Please run 'tickli init' first")
+	}
+
+	// Init the TickliClient
+	TickliClient = api.NewClient(token)
+	return TickliClient
+}
+
 func init() {
+	RegisterProjectOverride(Cmd)
+
 	Cmd.AddCommand(newCreateCommand())
 	Cmd.AddCommand(newUpdateCommand())
 	Cmd.AddCommand(newListCommand())
@@ -63,4 +68,23 @@ func init() {
 	Cmd.AddCommand(newUncompleteCommand())
 	Cmd.AddCommand(newDeleteCommand())
 	Cmd.AddCommand(newShowCommand())
+}
+
+func RegisterProjectOverride(cmd *cobra.Command) {
+	cmd.PersistentFlags().StringVarP(&projectID, "project-id", "P", "", "select another project")
+
+	_ = cmd.RegisterFlagCompletionFunc("project-id", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		client := loadClient()
+		var cacheCompletions []string
+		if client != nil {
+			projects, err := client.ListProjects()
+			if err == nil {
+				for i := range projects {
+					cacheCompletions = append(cacheCompletions, fmt.Sprintf("%s\t%s", projects[i].ID, projects[i].Name))
+				}
+				return cacheCompletions, cobra.ShellCompDirectiveNoFileComp
+			}
+		}
+		return nil, cobra.ShellCompDirectiveNoFileComp
+	})
 }

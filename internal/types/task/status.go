@@ -1,36 +1,36 @@
-package types
+package task
 
 import (
 	"encoding/json"
 	"github.com/gookit/color"
 )
 
-type TaskStatus int
+type Status int
 
 var (
-	StatusNormal   TaskStatus = 0
-	StatusComplete TaskStatus = 2
+	StatusNormal   Status = 0
+	StatusComplete Status = 2
 )
 
-func (s *TaskStatus) UnmarshalJSON(data []byte) error {
+func (s *Status) UnmarshalJSON(data []byte) error {
 	var status int
 	if err := json.Unmarshal(data, &status); err != nil {
 		return err
 	}
 	switch status {
 	case int(StatusNormal), int(StatusComplete):
-		*s = TaskStatus(status)
+		*s = Status(status)
 	default:
 		*s = StatusNormal
 	}
 	return nil
 }
 
-func (s TaskStatus) MarshalJSON() ([]byte, error) {
+func (s Status) MarshalJSON() ([]byte, error) {
 	return json.Marshal(int(s))
 }
 
-func (s TaskStatus) String() string {
+func (s Status) String() string {
 	switch s {
 	case StatusComplete:
 		return color.Green.Sprint("☑")

@@ -1,4 +1,4 @@
-package types
+package task
 
 import (
 	"encoding/json"
@@ -8,26 +8,23 @@ import (
 	"strings"
 )
 
-type TaskPriority int
+type Priority int
 
 const (
-	PriorityNone   TaskPriority = 0
-	PriorityLow    TaskPriority = 1
-	PriorityMedium TaskPriority = 3
-	PriorityHigh   TaskPriority = 5
+	PriorityNone   Priority = 0
+	PriorityLow    Priority = 1
+	PriorityMedium Priority = 3
+	PriorityHigh   Priority = 5
 )
 
-func RegisterTaskPriorityCompletions(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	return priorityMapKeys(), cobra.ShellCompDirectiveDefault
+var PriorityCompletion = []cobra.Completion{
+	cobra.CompletionWithDesc("none", "No task"),
+	cobra.CompletionWithDesc("low", "Low task"),
+	cobra.CompletionWithDesc("medium", "Medium task"),
+	cobra.CompletionWithDesc("high", "High task"),
 }
 
-func priorityMapKeys() []string {
-	keys := make([]string, 0, len(priorityMap))
-	for k := range priorityMap {
-		keys = append(keys, k)
-	}
-	return keys
-}
+var PriorityCompletionFunc = cobra.FixedCompletions(PriorityCompletion, cobra.ShellCompDirectiveNoFileComp)
 
 var (
 	NonePriorityColor   = color.HEX("#C6C6C6").C256()
@@ -36,32 +33,32 @@ var (
 	HighPriorityColor   = color.HEX("#D52B24").C256()
 )
 
-var priorityMap = map[string]TaskPriority{
+var priorityMap = map[string]Priority{
 	"none":   PriorityNone,
 	"low":    PriorityLow,
 	"medium": PriorityMedium,
 	"high":   PriorityHigh,
 }
 
-func (p *TaskPriority) UnmarshalJSON(data []byte) error {
+func (p *Priority) UnmarshalJSON(data []byte) error {
 	var priority int
 	if err := json.Unmarshal(data, &priority); err != nil {
 		return err
 	}
 	switch priority {
 	case int(PriorityNone), int(PriorityLow), int(PriorityMedium), int(PriorityHigh):
-		*p = TaskPriority(priority)
+		*p = Priority(priority)
 	default:
 		*p = PriorityNone
 	}
 	return nil
 }
 
-func (p TaskPriority) MarshalJSON() ([]byte, error) {
+func (p Priority) MarshalJSON() ([]byte, error) {
 	return json.Marshal(int(p))
 }
 
-func (p TaskPriority) String() string {
+func (p Priority) String() string {
 	flag := "⚑"
 	switch p {
 	case PriorityNone:
@@ -77,16 +74,16 @@ func (p TaskPriority) String() string {
 	return flag
 }
 
-func (p *TaskPriority) Set(value string) error {
+func (p *Priority) Set(value string) error {
 	priority, ok := priorityMap[strings.ToLower(value)]
 	if !ok {
-		return fmt.Errorf("invalid priority: %s", value)
+		return fmt.Errorf("invalid task: %s", value)
 	}
 
 	*p = priority
 	return nil
 }
 
-func (p *TaskPriority) Type() string {
-	return "TaskPriority"
+func (p *Priority) Type() string {
+	return "Priority"
 }

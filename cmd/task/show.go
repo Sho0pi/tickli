@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 	"github.com/sho0pi/tickli/internal/types"
+	"github.com/sho0pi/tickli/internal/types/project"
 	"github.com/sho0pi/tickli/internal/utils"
 	"github.com/spf13/cobra"
 )
@@ -37,9 +38,7 @@ You can choose between human-readable output or machine-readable JSON.`,
   tickli task show abc123def456 -o json`,
 		Args: cobra.ExactArgs(1),
 		PreRun: func(cmd *cobra.Command, args []string) {
-			if opts.projectID != "" {
-				projectID = opts.projectID
-			}
+			opts.projectID = projectID
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			taskId := args[0]
@@ -54,7 +53,7 @@ You can choose between human-readable output or machine-readable JSON.`,
 			}
 			switch opts.output {
 			case types.OutputSimple:
-				fmt.Println(utils.GetTaskDescription(task, types.DefaultColor))
+				fmt.Println(utils.GetTaskDescription(task, project.DefaultColor))
 			case types.OutputJSON:
 				jsonData, err := json.MarshalIndent(task, "", "  ")
 				if err != nil {
@@ -67,7 +66,6 @@ You can choose between human-readable output or machine-readable JSON.`,
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.projectID, "project-id", "i", "", "Project containing the task (if not in current project)")
 	cmd.Flags().VarP(&opts.output, "output", "o", "Display format: simple (human-readable) or json (machine-readable)")
 	return cmd
 }
