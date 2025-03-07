@@ -7,7 +7,7 @@ import (
 	"github.com/sho0pi/tickli/internal/types/project"
 )
 
-func GetProjectDescription(project *types.Project) string {
+func GetProjectDescription(project types.Project) string {
 	var projectStatus string
 	if project.Closed {
 		projectStatus = "Closed"
@@ -39,7 +39,7 @@ Tasks:`,
 	return description
 }
 
-func GetTaskDescription(task *types.Task, projectColor project.Color) string {
+func GetTaskDescription(task types.Task, projectColor project.Color) string {
 	projectLine := projectColor.Sprint("----------------------")
 
 	description := fmt.Sprintf(`
@@ -73,9 +73,9 @@ Tasks:`,
 	return description
 }
 
-func FuzzySelectProject(projects []*types.Project, query string) (*types.Project, error) {
+func FuzzySelectProject(projects []types.Project, query string) (types.Project, error) {
 	if len(projects) == 0 {
-		return nil, fmt.Errorf("no projects available for selection")
+		return types.Project{}, fmt.Errorf("no projects available for selection")
 	}
 	idx, err := fuzzyfinder.Find(
 		projects,
@@ -95,13 +95,13 @@ func FuzzySelectProject(projects []*types.Project, query string) (*types.Project
 		fuzzyfinder.WithPromptString("Search Project: "),
 	)
 	if err != nil {
-		return nil, err
+		return types.Project{}, err
 	}
 
 	return projects[idx], nil
 }
 
-func FuzzySelectTask(tasks []*types.Task, projectColor project.Color, query string) (*types.Task, error) {
+func FuzzySelectTask(tasks []types.Task, projectColor project.Color, query string) (types.Task, error) {
 	idx, err := fuzzyfinder.Find(
 		tasks,
 		func(i int) string {
@@ -120,7 +120,7 @@ func FuzzySelectTask(tasks []*types.Task, projectColor project.Color, query stri
 		fuzzyfinder.WithPromptString("Search Project: "),
 	)
 	if err != nil {
-		return nil, err
+		return types.Task{}, err
 	}
 
 	return tasks[idx], nil

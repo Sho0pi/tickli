@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
+	"github.com/sho0pi/tickli/internal/api"
+	"github.com/sho0pi/tickli/internal/completion"
 	"github.com/sho0pi/tickli/internal/config"
 	"github.com/sho0pi/tickli/internal/types"
 	"github.com/sho0pi/tickli/internal/utils"
@@ -11,13 +13,13 @@ import (
 	"strings"
 )
 
-func findProjectByID(projects []*types.Project, id string) (*types.Project, error) {
+func findProjectByID(projects []types.Project, id string) (types.Project, error) {
 	for i := range projects {
 		if projects[i].ID == id {
 			return projects[i], nil
 		}
 	}
-	return nil, fmt.Errorf("project not found with ID '%s'", id)
+	return types.Project{}, fmt.Errorf("project not found with ID '%s'", id)
 }
 
 func findProjectsByName(projects []*types.Project, name string) ([]*types.Project, error) {
@@ -35,14 +37,13 @@ func findProjectsByName(projects []*types.Project, name string) ([]*types.Projec
 }
 
 type useProjectOptions struct {
-	projectName string
-	projectID   string
+	projectID string
 }
 
-func newUseProjectCmd() *cobra.Command {
+func newUseProjectCmd(client *api.Client) *cobra.Command {
 	opts := &useProjectOptions{}
 	cmd := &cobra.Command{
-		Use:   "use [-n name | -i id]",
+		Use:   "use",
 		Short: "Switch active project context",
 		Long: `Switch the active project context for subsequent commands.
 
@@ -60,37 +61,28 @@ The selected project becomes the default context for future commands.`,
   
   # Switch by project ID
   tickli project use -i abc123def456`,
-		Args: cobra.NoArgs,
+		Args:              cobra.MaximumNArgs(1),
+		ValidArgsFunction: completion.ProjectNames(client),
+		PreRun: func(cmd *cobra.Command, args []string) {
+			if len(args) > 0 {
+				opts.projectID = args[0]
+			}
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			projects, err := TickliClient.ListProjects()
 			if err != nil {
 				return errors.Wrap(err, "could not fetch projects")
 			}
 
-			var selectedProject *types.Project
+			var selectedProject types.Project
 
-			switch {
-			case opts.projectID != "":
+			if opts.projectID != "" {
 				project, err := findProjectByID(projects, opts.projectID)
 				if err != nil {
 					return err
 				}
 				selectedProject = project
-			case opts.projectName != "":
-				matches, err := findProjectsByName(projects, opts.projectName)
-				if err != nil {
-					return err
-				}
-				if len(matches) == 1 {
-					selectedProject = matches[0]
-				} else {
-					project, err := utils.FuzzySelectProject(matches, "")
-					if err != nil {
-						return errors.Wrap(err, "could not select project")
-					}
-					selectedProject = project
-				}
-			default:
+			} else {
 				project, err := utils.FuzzySelectProject(projects, "")
 				if err != nil {
 					return errors.Wrap(err, "could not select project")
@@ -115,8 +107,5 @@ The selected project becomes the default context for future commands.`,
 		},
 	}
 
-	cmd.Flags().StringVarP(&opts.projectName, "name", "n", "", "Switch to the specified project by name (partial match supported)")
-	cmd.Flags().StringVarP(&opts.projectID, "id", "i", "", "Switch to the specified project by ID")
-	cmd.MarkFlagsMutuallyExclusive("name", "id")
 	return cmd
 }

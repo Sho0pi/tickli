@@ -67,6 +67,7 @@ Changes only the properties you specify - others remain unchanged.`,
 
 	cmd.Flags().StringVarP(&opts.name, "name", "n", "", "Change the project name")
 	cmd.Flags().VarP(&opts.color, "color", "c", "Change the project color (hex format, e.g., '#F18181')")
+	_ = cmd.RegisterFlagCompletionFunc("color", project.ColorCompletionFunc)
 	cmd.Flags().Var(&opts.viewMode, "view-mode", "Change how tasks are displayed: list, kanban, or timeline")
 	_ = cmd.RegisterFlagCompletionFunc("view-mode", project.ViewModeCompletionFunc)
 	cmd.Flags().Var(&opts.kind, "kind", "Change project type: TASK or NOTE")

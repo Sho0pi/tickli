@@ -51,7 +51,7 @@ supports both direct parameter input and interactive mode.`,
 				return errors.Wrap(err, fmt.Sprintf("failed to create project %s", p.Name))
 			}
 
-			fmt.Println(utils.GetProjectDescription(p))
+			fmt.Println(utils.GetProjectDescription(*p))
 			fmt.Println(p.ID)
 			return nil
 		},
@@ -59,6 +59,7 @@ supports both direct parameter input and interactive mode.`,
 	cmd.Flags().StringVarP(&opts.name, "name", "n", "", "Name of the new project")
 	_ = cmd.MarkFlagRequired("name")
 	cmd.Flags().VarP(&opts.color, "color", "c", "Color for the project (hex format, e.g., '#F18181')")
+	_ = cmd.RegisterFlagCompletionFunc("color", project.ColorCompletionFunc)
 	cmd.Flags().Var(&opts.viewMode, "view-mode", "How to display tasks: list, kanban, or timeline (default: list)")
 	_ = cmd.RegisterFlagCompletionFunc("view-mode", project.ViewModeCompletionFunc)
 	cmd.Flags().Var(&opts.kind, "kind", "Project type: TASK for action items or NOTE for information (default: TASK)")

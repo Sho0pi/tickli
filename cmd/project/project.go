@@ -9,26 +9,29 @@ import (
 
 var TickliClient *api.Client
 
-var Cmd = &cobra.Command{
-	Use:     "project",
-	Short:   "Work with TickTick projects.",
-	Aliases: []string{"list"},
-	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		token, err := config.LoadToken()
-		if err != nil || token == "" {
-			log.Fatal().Msg("Please run 'tickli init' first")
-		}
+func NewProjectCommand(client *api.Client) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:     "project",
+		Short:   "Work with TickTick projects.",
+		Aliases: []string{"list"},
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			token, err := config.LoadToken()
+			if err != nil || token == "" {
+				log.Fatal().Msg("Please run 'tickli init' first")
+			}
 
-		TickliClient = api.NewClient(token)
-		return nil
-	},
-}
+			TickliClient = api.NewClient(token)
+			return nil
+		},
+	}
+	cmd.AddCommand(
+		newListCommand(),
+		newCreateProjectCommand(),
+		newUpdateProjectCommand(),
+		newUseProjectCmd(client),
+		newShowCommand(),
+		newDeleteCommand(),
+	)
 
-func init() {
-	Cmd.AddCommand(newListCommand())
-	Cmd.AddCommand(newCreateProjectCommand())
-	Cmd.AddCommand(newUpdateProjectCommand())
-	Cmd.AddCommand(newUseProjectCmd())
-	Cmd.AddCommand(newDeleteCommand())
-	Cmd.AddCommand(newShowCommand())
+	return cmd
 }

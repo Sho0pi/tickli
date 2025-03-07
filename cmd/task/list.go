@@ -47,7 +47,7 @@ func fetchProjectColorAsync(ctx context.Context, projectID string) <-chan projec
 }
 
 type taskFilterResult struct {
-	tasks []*types.Task
+	tasks []types.Task
 	err   error
 }
 
@@ -81,7 +81,7 @@ func fetchAndFilterTasksAsync(ctx context.Context, projectID string, opts *listO
 	return resultChan
 }
 
-func filterTasks(tasks []*types.Task, opts *listOptions) []*types.Task {
+func filterTasks(tasks []types.Task, opts *listOptions) []types.Task {
 	// Filter by priority
 	tasks = Filter(tasks, func(t types.Task) bool {
 		return t.Priority >= opts.priority
@@ -147,7 +147,7 @@ tags, and due date. Results are displayed in an interactive selector.`,
 
 			// Wait for both operations to complete
 			var projectColor project.Color
-			var filteredTasks []*types.Task
+			var filteredTasks []types.Task
 
 			// Get the task results
 			taskResult := <-taskChan
@@ -187,10 +187,10 @@ tags, and due date. Results are displayed in an interactive selector.`,
 
 	return cmd
 }
-func Filter(tasks []*types.Task, predicate func(task types.Task) bool) []*types.Task {
-	var result []*types.Task
+func Filter(tasks []types.Task, predicate func(task types.Task) bool) []types.Task {
+	var result []types.Task
 	for _, t := range tasks {
-		if predicate(*t) {
+		if predicate(t) {
 			result = append(result, t)
 		}
 	}

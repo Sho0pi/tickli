@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gookit/color"
+	"github.com/spf13/cobra"
 	"regexp"
 	"strings"
 )
@@ -11,6 +12,21 @@ import (
 var DefaultColor = Color(color.HEX("#3694FE"))
 
 type Color color.RGBColor
+
+var ColorCompletion = []cobra.Completion{
+	cobra.CompletionWithDesc(DefaultColor.String(), "🎨Default color"),
+	cobra.CompletionWithDesc("#F8D966", "❤️Red"),
+	cobra.CompletionWithDesc("#F2B04A", "🧡Orange"),
+	cobra.CompletionWithDesc("#F8D966", "💛Yellow"),
+	cobra.CompletionWithDesc("#45FF17", "💚Green"),
+	cobra.CompletionWithDesc("#3694FE", "🩵Cyan"),
+	cobra.CompletionWithDesc("#FDF8DC", "💙Blue"),
+	cobra.CompletionWithDesc("#F8D966", "💜Purple"),
+	cobra.CompletionWithDesc("#F8D966", "💖Pink"),
+	cobra.CompletionWithDesc("#FDF8DC", "🤍White"),
+}
+
+var ColorCompletionFunc = cobra.FixedCompletions(ColorCompletion, cobra.ShellCompDirectiveNoFileComp)
 
 func (c *Color) UnmarshalJSON(data []byte) error {
 

@@ -13,36 +13,23 @@ import (
 	"time"
 )
 
-var TickliClient *api.Client
-
 var RootCmd = &cobra.Command{
 	Use:   "tickli",
 	Short: "TickTick CLI - A modern command line interface for TickTick",
 	Long: `tickli is a CLI tool that helps you manage your TickTick tasks from the command line.
 Complete documentation is available at https://github.com/sho0pi/tickli`,
 	SilenceErrors: true,
-	SilenceUsage:  true,
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		// Skip initialization check for shell completion
-		if cmd.Name() == "bash" || cmd.Name() == "zsh" || cmd.Name() == "fish" {
-			return
-		}
-		// Skip initialization check for init command
-		if cmd.Name() != "init" && cmd.Name() != "reset" && cmd.Name() != "help" && cmd.Name() != "completion" {
-			token, err := config.LoadToken()
-			if err != nil || token == "" {
-				log.Fatal().Msg("Please run 'tickli init' first")
-			}
-
-			// Init the TickliClient
-			TickliClient = api.NewClient(token)
-		}
-	},
+	SilenceUsage:  false,
 }
 
 func init() {
+	token, err := config.LoadToken()
+	if err != nil || token == "" {
+		log.Fatal().Msg("Please run 'tickli init' first")
+	}
+	client := api.NewClient(token)
 	RootCmd.AddCommand(task.Cmd)
-	RootCmd.AddCommand(project.Cmd)
+	RootCmd.AddCommand(project.NewProjectCommand(client))
 }
 
 func Execute() {

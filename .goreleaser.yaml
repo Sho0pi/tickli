@@ -1,5 +1,10 @@
 version: 2
 
+project_name: tickli
+
+release:
+  name_template: "Tickli {{ .Version }}"
+
 before:
   hooks:
     - go mod tidy
@@ -22,7 +27,8 @@ builds:
         -X 'github.com/sho0pi/tickli/cmd.Version={{ .Version }}'
 
 archives:
-  - formats: [tar.gz]
+  - formats:
+      - tar.gz
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     files:
       - LICENSE
@@ -30,7 +36,8 @@ archives:
       - completions/*
     format_overrides:
       - goos: windows
-        formats: [zip]
+        formats:
+          - zip
 
 checksum:
   name_template: "checksums.txt"

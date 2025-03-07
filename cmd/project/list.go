@@ -13,8 +13,8 @@ type listOptions struct {
 	filter string
 }
 
-func filterProjectByName(projects []*types.Project, name string) ([]*types.Project, error) {
-	var matched []*types.Project
+func filterProjectByName(projects []types.Project, name string) ([]types.Project, error) {
+	var matched []types.Project
 	nameLower := strings.ToLower(name)
 	for i := range projects {
 		if strings.Contains(strings.ToLower(projects[i].Name), nameLower) {

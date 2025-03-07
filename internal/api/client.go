@@ -60,8 +60,8 @@ func GetAccessToken(clientID, clientSecret, code string) (string, error) {
 	return result.AccessToken, nil
 }
 
-func (c *Client) ListProjects() ([]*types.Project, error) {
-	var projects []*types.Project
+func (c *Client) ListProjects() ([]types.Project, error) {
+	var projects []types.Project
 	resp, err := c.http.R().
 		SetResult(&projects).
 		Get("/project")
@@ -75,28 +75,28 @@ func (c *Client) ListProjects() ([]*types.Project, error) {
 	}
 
 	// Adds the default InboxProject - not appears by default
-	projects = append(projects, &types.InboxProject)
+	projects = append(projects, types.InboxProject)
 
 	return projects, nil
 }
 
-func (c *Client) GetProject(id string) (*types.Project, error) {
+func (c *Client) GetProject(id string) (types.Project, error) {
 	if id == types.InboxProject.ID {
-		return &types.InboxProject, nil
+		return types.InboxProject, nil
 	}
-	var project *types.Project
+	var project types.Project
 	resp, err := c.http.R().
 		SetResult(&project).
 		Get("/project/" + id)
 
 	if err != nil {
-		return nil, errors.Wrap(err, "getting project")
+		return types.NullProject, errors.Wrap(err, "getting project")
 	}
 	if resp.IsError() {
-		return nil, fmt.Errorf("failed to get project: %s", resp.String())
+		return types.NullProject, fmt.Errorf("failed to get project: %s", resp.String())
 	}
-	if project == nil {
-		return nil, fmt.Errorf("project not found: %s", id)
+	if project == types.NullProject {
+		return types.NullProject, fmt.Errorf("project not found: %s", id)
 	}
 
 	return project, nil
@@ -118,9 +118,9 @@ func (c *Client) GetTask(projectID string, taskID string) (*types.Task, error) {
 	return &task, nil
 }
 
-func (c *Client) ListTasks(projectID string) ([]*types.Task, error) {
+func (c *Client) ListTasks(projectID string) ([]types.Task, error) {
 	var projectData struct {
-		Tasks []*types.Task `json:"tasks"`
+		Tasks []types.Task `json:"tasks"`
 	}
 	resp, err := c.http.R().
 		SetResult(&projectData).
@@ -193,21 +193,17 @@ func (c *Client) UpdateTask(task *types.Task) (*types.Task, error) {
 	return task, nil
 }
 
-func (c *Client) UpdateProject(project *types.Project) (*types.Project, error) {
-	if project == nil {
-		return nil, errors.New("project cannot be nil")
-	}
-
+func (c *Client) UpdateProject(project types.Project) (types.Project, error) {
 	resp, err := c.http.R().
 		SetBody(project).
 		SetResult(project).
 		Post(fmt.Sprintf("/project/%s", project.ID))
 
 	if err != nil {
-		return nil, errors.Wrap(err, "updating project")
+		return types.NullProject, errors.Wrap(err, "updating project")
 	}
 	if resp.IsError() {
-		return nil, fmt.Errorf("failed to update project: %s", resp.String())
+		return types.NullProject, fmt.Errorf("failed to update project: %s", resp.String())
 	}
 
 	return project, nil

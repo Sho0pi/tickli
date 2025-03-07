@@ -87,7 +87,7 @@ This command allows modifying title, content, priority, dates, and more.`,
 				return errors.Wrap(err, fmt.Sprintf("failed to update task %s", opts.taskID))
 			}
 			fmt.Printf("Task %s updated successfully\n", t.ID)
-			fmt.Println(utils.GetTaskDescription(t, project.DefaultColor))
+			fmt.Println(utils.GetTaskDescription(*t, project.DefaultColor))
 			return nil
 		},
 	}

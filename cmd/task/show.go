@@ -53,7 +53,7 @@ You can choose between human-readable output or machine-readable JSON.`,
 			}
 			switch opts.output {
 			case types.OutputSimple:
-				fmt.Println(utils.GetTaskDescription(task, project.DefaultColor))
+				fmt.Println(utils.GetTaskDescription(*task, project.DefaultColor))
 			case types.OutputJSON:
 				jsonData, err := json.MarshalIndent(task, "", "  ")
 				if err != nil {

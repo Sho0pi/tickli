@@ -61,9 +61,9 @@ Can include associated tasks and switch between output formats.`,
 				}
 				switch opts.output {
 				case types.OutputSimple:
-					fmt.Println(utils.GetProjectDescription(&projectData.Project))
+					fmt.Println(utils.GetProjectDescription(projectData.Project))
 					for _, task := range projectData.Tasks {
-						fmt.Println(utils.GetTaskDescription(&task, projectData.Project.Color))
+						fmt.Println(utils.GetTaskDescription(task, projectData.Project.Color))
 					}
 				case types.OutputJSON:
 					jsonData, err := json.MarshalIndent(projectData, "", "  ")
