@@ -5,7 +5,9 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sho0pi/tickli/internal/types"
 	"github.com/sho0pi/tickli/internal/types/task"
+	"github.com/sho0pi/tickli/internal/utils"
 	"github.com/spf13/cobra"
+	"time"
 )
 
 type createOptions struct {
@@ -69,17 +71,36 @@ and tags. At minimum, a title is required unless using interactive mode.`,
 
 				Priority: opts.priority,
 				Tags:     opts.tags,
-
-				IsAllDay: opts.allDay,
 			}
 
 			if opts.date != "" {
-				start, end, err := types.GetRangeFromString(opts.date)
+				r, err := utils.ParseTimeExpression(opts.date)
 				if err != nil {
 					return errors.Wrap(err, "failed to parse date range")
 				}
-				t.StartDate = start
-				t.DueDate = end
+				t.StartDate = types.TickTickTime(r.Start())
+				t.DueDate = types.TickTickTime(r.End())
+				t.IsAllDay = r.IsAllDay()
+			}
+			if opts.startDate != "" {
+				startDate, err := time.Parse(time.RFC3339, opts.startDate)
+				if err != nil {
+					return errors.Wrap(err, "failed to parse start date")
+				}
+				t.StartDate = types.TickTickTime(startDate)
+			}
+			if opts.dueDate != "" {
+				dueDate, err := time.Parse(time.RFC3339, opts.dueDate)
+				if err != nil {
+					return errors.Wrap(err, "failed to parse due date")
+				}
+				t.DueDate = types.TickTickTime(dueDate)
+			}
+			if opts.timeZone != "" {
+				t.TimeZone = opts.timeZone
+			}
+			if cmd.Flags().Changed("all-day") {
+				t.IsAllDay = opts.allDay
 			}
 
 			t, err := TickliClient.CreateTask(t)
@@ -101,6 +122,11 @@ and tags. At minimum, a title is required unless using interactive mode.`,
 	cmd.Flags().StringVar(&opts.startDate, "start", "", "When the task begins (ISO format: '2025-02-18T15:04:05Z')")
 	cmd.Flags().StringVar(&opts.dueDate, "due", "", "When the task is due (ISO format: '2025-02-18T18:00:00Z')")
 	cmd.Flags().StringVar(&opts.date, "date", "", "Set date with natural language (e.g., 'today', 'next week')")
+
+	cmd.MarkFlagsMutuallyExclusive("date", "all-day")
+	cmd.MarkFlagsMutuallyExclusive("date", "start")
+	cmd.MarkFlagsMutuallyExclusive("date", "due")
+
 	cmd.Flags().StringVar(&opts.timeZone, "tz", "", "Timezone for date calculations (e.g., 'America/Los_Angeles')")
 	cmd.Flags().StringSliceVar(&opts.reminders, "reminders", []string{}, "List of reminder triggers (e.g., '9h', '0s')")
 	cmd.Flags().StringSliceVar(&opts.tags, "tags", []string{}, "Apply tags to categorize the task (comma-separated)")

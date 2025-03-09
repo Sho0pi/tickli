@@ -3,10 +3,12 @@ package task
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/sho0pi/tickli/internal/types"
 	"github.com/sho0pi/tickli/internal/types/project"
 	"github.com/sho0pi/tickli/internal/types/task"
 	"github.com/sho0pi/tickli/internal/utils"
 	"github.com/spf13/cobra"
+	"time"
 )
 
 type updateOptions struct {
@@ -79,6 +81,33 @@ This command allows modifying title, content, priority, dates, and more.`,
 			if cmd.Flags().Changed("tags") {
 				t.Tags = opts.tags
 			}
+			if cmd.Flags().Changed("date") {
+				r, err := utils.ParseTimeExpression(opts.date)
+				if err != nil {
+					return errors.Wrap(err, fmt.Sprintf("failed to parse range %s", opts.date))
+				}
+				t.StartDate = types.TickTickTime(r.Start())
+				t.DueDate = types.TickTickTime(r.End())
+				t.IsAllDay = r.IsAllDay()
+
+			}
+			if opts.startDate != "" {
+				startDate, err := time.Parse(time.RFC3339, opts.startDate)
+				if err != nil {
+					return errors.Wrap(err, "failed to parse start date")
+				}
+				t.StartDate = types.TickTickTime(startDate)
+			}
+			if opts.dueDate != "" {
+				dueDate, err := time.Parse(time.RFC3339, opts.dueDate)
+				if err != nil {
+					return errors.Wrap(err, "failed to parse due date")
+				}
+				t.DueDate = types.TickTickTime(dueDate)
+			}
+			if opts.timeZone != "" {
+				t.TimeZone = opts.timeZone
+			}
 			if cmd.Flags().Changed("all-day") {
 				t.IsAllDay = opts.allDay
 			}
@@ -99,6 +128,12 @@ This command allows modifying title, content, priority, dates, and more.`,
 	cmd.Flags().BoolVarP(&opts.allDay, "all-day", "a", false, "Toggle all-day status for the task")
 	cmd.Flags().StringVar(&opts.startDate, "start", "", "Change when the task begins")
 	cmd.Flags().StringVar(&opts.dueDate, "due", "", "Change when the task is due")
+	cmd.Flags().StringVar(&opts.date, "date", "", "Set date with natural language (e.g., 'today', 'next week')")
+
+	cmd.MarkFlagsMutuallyExclusive("date", "start")
+	cmd.MarkFlagsMutuallyExclusive("date", "all-day")
+	cmd.MarkFlagsMutuallyExclusive("date", "due")
+
 	cmd.Flags().StringVar(&opts.timeZone, "timezone", "", "Change timezone for date calculations")
 	cmd.Flags().StringSliceVar(&opts.reminders, "reminders", []string{}, "Set reminders (e.g., '10m', '1h before')")
 	cmd.Flags().StringVar(&opts.repeat, "repeat", "", "New recurring rule (e.g., 'daily', 'weekly on monday')")
