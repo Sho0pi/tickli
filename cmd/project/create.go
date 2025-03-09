@@ -3,6 +3,7 @@ package project
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/sho0pi/tickli/internal/api"
 	"github.com/sho0pi/tickli/internal/types"
 	"github.com/sho0pi/tickli/internal/types/project"
 	"github.com/sho0pi/tickli/internal/utils"
@@ -17,7 +18,7 @@ type createProjectOptions struct {
 	interactive bool
 }
 
-func newCreateProjectCommand() *cobra.Command {
+func newCreateProjectCommand(client *api.Client) *cobra.Command {
 	opts := &createProjectOptions{
 		kind:     project.KindTask,
 		viewMode: project.ViewModeList,
@@ -46,7 +47,7 @@ supports both direct parameter input and interactive mode.`,
 				Kind:     opts.kind,
 			}
 
-			p, err := TickliClient.CreateProject(p)
+			p, err := client.CreateProject(p)
 			if err != nil {
 				return errors.Wrap(err, fmt.Sprintf("failed to create project %s", p.Name))
 			}

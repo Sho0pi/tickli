@@ -3,6 +3,7 @@ package project
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/sho0pi/tickli/internal/api"
 	"github.com/spf13/cobra"
 )
 
@@ -11,7 +12,7 @@ type deleteOptions struct {
 	force     bool
 }
 
-func newDeleteCommand() *cobra.Command {
+func newDeleteCommand(client *api.Client) *cobra.Command {
 	opts := deleteOptions{}
 	cmd := &cobra.Command{
 		Use:   "delete <project-id>",
@@ -40,7 +41,7 @@ the deletion unless the --force flag is used.`,
 				}
 			}
 
-			err := TickliClient.DeleteProject(opts.projectID)
+			err := client.DeleteProject(opts.projectID)
 			if err != nil {
 				return errors.Wrap(err, fmt.Sprintf("failed to delete project %s", opts.projectID))
 			}

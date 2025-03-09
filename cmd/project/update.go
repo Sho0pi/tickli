@@ -3,6 +3,7 @@ package project
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/sho0pi/tickli/internal/api"
 	"github.com/sho0pi/tickli/internal/types/project"
 	"github.com/sho0pi/tickli/internal/utils"
 	"github.com/spf13/cobra"
@@ -17,7 +18,7 @@ type updateProjectOptions struct {
 	interactive bool
 }
 
-func newUpdateProjectCommand() *cobra.Command {
+func newUpdateProjectCommand(client *api.Client) *cobra.Command {
 	opts := &updateProjectOptions{}
 	cmd := &cobra.Command{
 		Use:   "update <project-id>",
@@ -39,7 +40,7 @@ Changes only the properties you specify - others remain unchanged.`,
 			opts.projectID = args[0]
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			p, err := TickliClient.GetProject(opts.projectID)
+			p, err := client.GetProject(opts.projectID)
 			if err != nil {
 				return errors.Wrap(err, fmt.Sprintf("failed to fetch project %s", opts.projectID))
 			}
@@ -55,7 +56,7 @@ Changes only the properties you specify - others remain unchanged.`,
 			if cmd.Flags().Changed("kind") {
 				p.Kind = opts.kind
 			}
-			p, err = TickliClient.UpdateProject(p)
+			p, err = client.UpdateProject(p)
 			if err != nil {
 				return errors.Wrap(err, fmt.Sprintf("failed to update project %s", opts.projectID))
 			}

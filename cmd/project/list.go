@@ -3,6 +3,7 @@ package project
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/sho0pi/tickli/internal/api"
 	"github.com/sho0pi/tickli/internal/types"
 	"github.com/sho0pi/tickli/internal/utils"
 	"github.com/spf13/cobra"
@@ -27,7 +28,7 @@ func filterProjectByName(projects []types.Project, name string) ([]types.Project
 	return matched, nil
 }
 
-func newListCommand() *cobra.Command {
+func newListCommand(client *api.Client) *cobra.Command {
 	opts := &listOptions{}
 	cmd := &cobra.Command{
 		Use:     "list",
@@ -43,7 +44,7 @@ then displays a fuzzy-search selector to choose a project.`,
   # Filter projects by name
   tickli project list -f "work"`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			projects, err := TickliClient.ListProjects()
+			projects, err := client.ListProjects()
 			if err != nil {
 				return errors.Wrap(err, "failed to fetch projects")
 			}

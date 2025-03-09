@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/sho0pi/tickli/internal/api"
 	"github.com/sho0pi/tickli/internal/config"
 	"github.com/sho0pi/tickli/internal/types"
 	"github.com/sho0pi/tickli/internal/utils"
@@ -16,7 +17,7 @@ type showOptions struct {
 	output    types.OutputFormat
 }
 
-func newShowCommand() *cobra.Command {
+func newShowCommand(client *api.Client) *cobra.Command {
 	opts := &showOptions{
 		output: types.OutputSimple,
 	}
@@ -55,7 +56,7 @@ Can include associated tasks and switch between output formats.`,
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if opts.withTasks {
-				projectData, err := TickliClient.GetProjectWithTasks(opts.projectID)
+				projectData, err := client.GetProjectWithTasks(opts.projectID)
 				if err != nil {
 					return errors.Wrap(err, "failed to get project data")
 				}
@@ -73,7 +74,7 @@ Can include associated tasks and switch between output formats.`,
 					fmt.Println(string(jsonData))
 				}
 			} else {
-				project, err := TickliClient.GetProject(opts.projectID)
+				project, err := client.GetProject(opts.projectID)
 				if err != nil {
 					return errors.Wrap(err, fmt.Sprintf("failed to get project %s", opts.projectID))
 				}

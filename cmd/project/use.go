@@ -69,7 +69,7 @@ The selected project becomes the default context for future commands.`,
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			projects, err := TickliClient.ListProjects()
+			projects, err := client.ListProjects()
 			if err != nil {
 				return errors.Wrap(err, "could not fetch projects")
 			}
