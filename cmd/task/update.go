@@ -3,6 +3,7 @@ package task
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/sho0pi/tickli/internal/api"
 	"github.com/sho0pi/tickli/internal/types"
 	"github.com/sho0pi/tickli/internal/types/project"
 	"github.com/sho0pi/tickli/internal/types/task"
@@ -36,7 +37,7 @@ type updateOptions struct {
 	interactive bool
 }
 
-func newUpdateCommand() *cobra.Command {
+func newUpdateCommand(client *api.Client) *cobra.Command {
 	opts := &updateOptions{}
 	cmd := &cobra.Command{
 		Use:   "update <task-id>",
@@ -62,7 +63,7 @@ This command allows modifying title, content, priority, dates, and more.`,
 			opts.taskID = args[0]
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			t, err := TickliClient.GetTask(opts.projectID, opts.taskID)
+			t, err := client.GetTask(opts.projectID, opts.taskID)
 			if err != nil {
 				return errors.Wrap(err, fmt.Sprintf("failed to get task with ID %s", opts.taskID))
 			}
@@ -111,7 +112,7 @@ This command allows modifying title, content, priority, dates, and more.`,
 			if cmd.Flags().Changed("all-day") {
 				t.IsAllDay = opts.allDay
 			}
-			t, err = TickliClient.UpdateTask(t)
+			t, err = client.UpdateTask(t)
 			if err != nil {
 				return errors.Wrap(err, fmt.Sprintf("failed to update task %s", opts.taskID))
 			}

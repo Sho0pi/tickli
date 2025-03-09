@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/rs/zerolog/log"
+	"github.com/sho0pi/tickli/internal/api"
 	"github.com/sho0pi/tickli/internal/types"
 	"github.com/sho0pi/tickli/internal/types/project"
 	"github.com/sho0pi/tickli/internal/types/task"
@@ -21,8 +22,8 @@ type listOptions struct {
 	projectID string
 }
 
-func fetchProjectColor(projectID string) project.Color {
-	p, err := TickliClient.GetProject(projectID)
+func fetchProjectColor(client *api.Client, projectID string) project.Color {
+	p, err := client.GetProject(projectID)
 	if err != nil {
 		log.Warn().Err(err).Msg("failed to get p color, using default color")
 		return project.DefaultColor
@@ -30,7 +31,7 @@ func fetchProjectColor(projectID string) project.Color {
 	return p.Color
 }
 
-func fetchProjectColorAsync(ctx context.Context, projectID string) <-chan project.Color {
+func fetchProjectColorAsync(ctx context.Context, client *api.Client, projectID string) <-chan project.Color {
 	colorChan := make(chan project.Color, 1)
 
 	go func() {
@@ -39,7 +40,7 @@ func fetchProjectColorAsync(ctx context.Context, projectID string) <-chan projec
 		select {
 		case <-ctx.Done():
 			return
-		case colorChan <- fetchProjectColor(projectID):
+		case colorChan <- fetchProjectColor(client, projectID):
 		}
 	}()
 
@@ -51,14 +52,14 @@ type taskFilterResult struct {
 	err   error
 }
 
-func fetchAndFilterTasksAsync(ctx context.Context, projectID string, opts *listOptions) <-chan taskFilterResult {
+func fetchAndFilterTasksAsync(ctx context.Context, client *api.Client, projectID string, opts *listOptions) <-chan taskFilterResult {
 	resultChan := make(chan taskFilterResult, 1)
 
 	go func() {
 		defer close(resultChan)
 
 		// Fetch tasks
-		tasks, err := TickliClient.ListTasks(projectID)
+		tasks, err := client.ListTasks(projectID)
 		if err != nil {
 			select {
 			case <-ctx.Done():
@@ -110,7 +111,7 @@ func filterTasks(tasks []types.Task, opts *listOptions) []types.Task {
 	return tasks
 }
 
-func newListCommand() *cobra.Command {
+func newListCommand(client *api.Client) *cobra.Command {
 	opts := &listOptions{}
 	cmd := &cobra.Command{
 		Use:     "list",
@@ -142,8 +143,8 @@ tags, and due date. Results are displayed in an interactive selector.`,
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			colorChan := fetchProjectColorAsync(ctx, projectID)
-			taskChan := fetchAndFilterTasksAsync(ctx, projectID, opts)
+			colorChan := fetchProjectColorAsync(ctx, client, projectID)
+			taskChan := fetchAndFilterTasksAsync(ctx, client, projectID, opts)
 
 			// Wait for both operations to complete
 			var projectColor project.Color

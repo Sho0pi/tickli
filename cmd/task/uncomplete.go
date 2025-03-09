@@ -2,6 +2,7 @@ package task
 
 import (
 	"github.com/rs/zerolog/log"
+	"github.com/sho0pi/tickli/internal/api"
 	"github.com/spf13/cobra"
 )
 
@@ -10,7 +11,7 @@ type uncompleteOptions struct {
 	taskID    string
 }
 
-func newUncompleteCommand() *cobra.Command {
+func newUncompleteCommand(client *api.Client) *cobra.Command {
 	opts := &uncompleteOptions{}
 	cmd := &cobra.Command{
 		Use:   "uncomplete <task-id>",

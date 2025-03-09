@@ -3,6 +3,7 @@ package task
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/sho0pi/tickli/internal/api"
 	"github.com/spf13/cobra"
 )
 
@@ -12,7 +13,7 @@ type deleteOptions struct {
 	force     bool
 }
 
-func newDeleteCommand() *cobra.Command {
+func newDeleteCommand(client *api.Client) *cobra.Command {
 	opts := &deleteOptions{}
 	cmd := &cobra.Command{
 		Use:     "delete <task-id>",
@@ -46,7 +47,7 @@ the deletion unless the --force flag is used.`,
 				}
 			}
 
-			err := TickliClient.DeleteTask(opts.projectID, opts.taskID)
+			err := client.DeleteTask(opts.projectID, opts.taskID)
 			if err != nil {
 				return errors.Wrap(err, fmt.Sprintf("failed to delete task %s", opts.taskID))
 			}

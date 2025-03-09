@@ -14,7 +14,7 @@ type resetOptions struct {
 	force bool
 }
 
-func newResetCommand() *cobra.Command {
+func NewResetCommand() *cobra.Command {
 	opts := &resetOptions{}
 	cmd := &cobra.Command{
 		Use:   "reset",
@@ -49,8 +49,4 @@ This is useful if you need to reauthenticate with TickTick.`,
 
 	cmd.Flags().BoolVar(&opts.force, "force", false, "Reset authentication without confirmation")
 	return cmd
-}
-
-func init() {
-	RootCmd.AddCommand(newResetCommand())
 }

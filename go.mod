@@ -13,18 +13,15 @@ require (
 	github.com/ijt/go-anytime v1.9.2
 	github.com/joho/godotenv v1.5.1
 	github.com/ktr0731/go-fuzzyfinder v0.8.0
-	github.com/olebedev/when v1.1.0
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.33.0
-	github.com/sahilm/fuzzy v0.1.1
 	github.com/sho0pi/naturaltime v0.0.1
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.19.0
 )
 
 require (
-	github.com/AlekSi/pointer v1.0.0 // indirect
 	github.com/atotto/clipboard v0.1.4 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/x/ansi v0.8.0 // indirect

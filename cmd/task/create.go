@@ -3,6 +3,7 @@ package task
 import (
 	"fmt"
 	"github.com/pkg/errors"
+	"github.com/sho0pi/tickli/internal/api"
 	"github.com/sho0pi/tickli/internal/types"
 	"github.com/sho0pi/tickli/internal/types/task"
 	"github.com/sho0pi/tickli/internal/utils"
@@ -34,7 +35,7 @@ type createOptions struct {
 	projectID string
 }
 
-func newCreateCommand() *cobra.Command {
+func newCreateCommand(client *api.Client) *cobra.Command {
 	opts := &createOptions{}
 	cmd := &cobra.Command{
 		Use:     "create",
@@ -103,7 +104,7 @@ and tags. At minimum, a title is required unless using interactive mode.`,
 				t.IsAllDay = opts.allDay
 			}
 
-			t, err := TickliClient.CreateTask(t)
+			t, err := client.CreateTask(t)
 			if err != nil {
 				return errors.Wrap(err, "failed to create task")
 			}

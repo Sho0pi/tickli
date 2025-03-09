@@ -9,21 +9,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var TickliClient *api.Client
-
 var (
 	projectID string
 )
 
-var Cmd = &cobra.Command{
-	Use:   "task",
-	Short: "Work with TickTick tasks",
-	Long: `Create, view, update, and manage tasks in your TickTick projects.
+func NewTaskCommand() *cobra.Command {
+	var client api.Client
+	cmd := &cobra.Command{
+		Use:   "task",
+		Short: "Work with TickTick tasks",
+		Long: `Create, view, update, and manage tasks in your TickTick projects.
     
 All task commands operate on the current active project by default.
 You can change the current project with 'tickli project use' or
 specify a different project with the --project-id flag.`,
-	Example: `  # List all tasks in current project
+		Example: `  # List all tasks in current project
   tickli task list
   
   # Create a new task
@@ -31,20 +31,36 @@ specify a different project with the --project-id flag.`,
   
   # Complete a task
   tickli task complete abc123def456`,
-	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		loadClient()
-		if projectID == "" {
-			cfg, err := config.Load()
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			token, err := config.LoadToken()
 			if err != nil {
-				return errors.Wrap(err, "failed to load config")
+				log.Fatal().Err(err).Msg("Please run 'tickli init' first")
 			}
-			projectID = cfg.DefaultProjectID
-		}
-		return nil
-	},
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("task called")
-	},
+			client = *api.NewClient(token)
+			if projectID == "" {
+				cfg, err := config.Load()
+				if err != nil {
+					return errors.Wrap(err, "failed to load config")
+				}
+				projectID = cfg.DefaultProjectID
+			}
+			return nil
+		},
+	}
+
+	cmd.AddCommand(
+		newCompleteCmd(&client),
+		newDeleteCommand(&client),
+		newShowCommand(&client),
+		newCreateCommand(&client),
+		newListCommand(&client),
+		newUncompleteCommand(&client),
+		newUpdateCommand(&client),
+	)
+
+	RegisterProjectOverride(cmd)
+
+	return cmd
 }
 
 func loadClient() *api.Client {
@@ -54,20 +70,8 @@ func loadClient() *api.Client {
 	}
 
 	// Init the TickliClient
-	TickliClient = api.NewClient(token)
-	return TickliClient
-}
-
-func init() {
-	RegisterProjectOverride(Cmd)
-
-	Cmd.AddCommand(newCreateCommand())
-	Cmd.AddCommand(newUpdateCommand())
-	Cmd.AddCommand(newListCommand())
-	Cmd.AddCommand(newCompleteCmd())
-	Cmd.AddCommand(newUncompleteCommand())
-	Cmd.AddCommand(newDeleteCommand())
-	Cmd.AddCommand(newShowCommand())
+	client := api.NewClient(token)
+	return client
 }
 
 func RegisterProjectOverride(cmd *cobra.Command) {

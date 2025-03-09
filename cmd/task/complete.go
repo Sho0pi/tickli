@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gookit/color"
 	"github.com/pkg/errors"
+	"github.com/sho0pi/tickli/internal/api"
 	"github.com/spf13/cobra"
 )
 
@@ -12,7 +13,7 @@ type completeOptions struct {
 	taskID    string
 }
 
-func newCompleteCmd() *cobra.Command {
+func newCompleteCmd(client *api.Client) *cobra.Command {
 	opts := &completeOptions{}
 	cmd := &cobra.Command{
 		Use:   "complete <task-id>",
@@ -32,7 +33,7 @@ but will no longer appear in default listings unless using the --all flag.`,
 			opts.taskID = args[0]
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			err := TickliClient.CompleteTask(opts.projectID, opts.taskID)
+			err := client.CompleteTask(opts.projectID, opts.taskID)
 			if err != nil {
 				return errors.Wrap(err, "failed to complete task")
 			}

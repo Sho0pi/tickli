@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
+	"github.com/sho0pi/tickli/internal/api"
 	"github.com/sho0pi/tickli/internal/types"
 	"github.com/sho0pi/tickli/internal/types/project"
 	"github.com/sho0pi/tickli/internal/utils"
@@ -17,7 +18,7 @@ type showOptions struct {
 	output    types.OutputFormat
 }
 
-func newShowCommand() *cobra.Command {
+func newShowCommand(client *api.Client) *cobra.Command {
 	opts := &showOptions{
 		output: types.OutputSimple,
 	}
@@ -43,7 +44,7 @@ You can choose between human-readable output or machine-readable JSON.`,
 			opts.taskID = args[0]
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			task, err := TickliClient.GetTask(opts.projectID, opts.taskID)
+			task, err := client.GetTask(opts.projectID, opts.taskID)
 			if err != nil {
 				return err
 			}
