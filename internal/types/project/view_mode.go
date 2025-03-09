@@ -2,10 +2,11 @@ package project
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/spf13/cobra"
 )
 
-// ViewMode describes the view mode of the project, by default will be "list"
+// ViewMode represents the different view modes available in the project, by default will be "list"
 type ViewMode string
 
 const (
@@ -15,9 +16,9 @@ const (
 )
 
 var ViewModeCompletion = []cobra.Completion{
-	cobra.CompletionWithDesc(string(ViewModeList), "List view mode"),
-	cobra.CompletionWithDesc(string(ViewModeKanban), "Kanban view mode"),
-	cobra.CompletionWithDesc(string(ViewModeTimeline), "Timeline view mode"),
+	cobra.CompletionWithDesc(ViewModeList.String(), "List view mode"),
+	cobra.CompletionWithDesc(ViewModeKanban.String(), "Kanban view mode"),
+	cobra.CompletionWithDesc(ViewModeTimeline.String(), "Timeline view mode"),
 }
 
 var ViewModeCompletionFunc = cobra.FixedCompletions(ViewModeCompletion, cobra.ShellCompDirectiveNoFileComp)
@@ -27,10 +28,9 @@ func (vm *ViewMode) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &viewMode); err != nil {
 		return err
 	}
-	switch viewMode {
-	case string(ViewModeList), string(ViewModeKanban), string(ViewModeTimeline):
+	if isValidViewMode(viewMode) {
 		*vm = ViewMode(viewMode)
-	default:
+	} else {
 		*vm = ViewModeList
 	}
 	return nil
@@ -45,13 +45,20 @@ func (vm ViewMode) String() string {
 }
 
 func (vm *ViewMode) Set(s string) error {
-	switch s {
-	case string(ViewModeList), string(ViewModeKanban), string(ViewModeTimeline):
+	if isValidViewMode(s) {
 		*vm = ViewMode(s)
-	default:
-		*vm = ViewModeList
+		return nil
 	}
-	return nil
+	return fmt.Errorf("invalid view mode %q", s)
+}
+
+func isValidViewMode(mode string) bool {
+	switch mode {
+	case string(ViewModeList), string(ViewModeKanban), string(ViewModeTimeline):
+		return true
+	default:
+		return false
+	}
 }
 
 func (vm *ViewMode) Type() string {

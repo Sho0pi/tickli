@@ -24,8 +24,8 @@ Complete documentation is available at https://github.com/sho0pi/tickli`,
 
 func init() {
 	token, err := config.LoadToken()
-	if err != nil || token == "" {
-		log.Fatal().Msg("Please run 'tickli init' first")
+	if err != nil {
+		log.Fatal().Err(err).Msg("Please run 'tickli init' first")
 	}
 	client := api.NewClient(token)
 	RootCmd.AddCommand(task.Cmd)

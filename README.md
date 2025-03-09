@@ -76,7 +76,7 @@ tickli task complete <task-id>
 - [x] Basic task management
 - [x] Project management
 - [x] Authentication
-- [ ] Advanced date/time handling and timezone support
+- [x] Advanced date/time handling and timezone support
 - [ ] Interactive modes for all commands
 - [ ] Subtask management
 - [ ] TUI interface with bubbletea

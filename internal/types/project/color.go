@@ -15,14 +15,14 @@ type Color color.RGBColor
 
 var ColorCompletion = []cobra.Completion{
 	cobra.CompletionWithDesc(DefaultColor.String(), "🎨Default color"),
-	cobra.CompletionWithDesc("#F8D966", "❤️Red"),
+	cobra.CompletionWithDesc("#EC6665", "❤️Red"),
 	cobra.CompletionWithDesc("#F2B04A", "🧡Orange"),
-	cobra.CompletionWithDesc("#F8D966", "💛Yellow"),
-	cobra.CompletionWithDesc("#45FF17", "💚Green"),
-	cobra.CompletionWithDesc("#3694FE", "🩵Cyan"),
-	cobra.CompletionWithDesc("#FDF8DC", "💙Blue"),
-	cobra.CompletionWithDesc("#F8D966", "💜Purple"),
-	cobra.CompletionWithDesc("#F8D966", "💖Pink"),
+	cobra.CompletionWithDesc("#FFD866", "💛Yellow"),
+	cobra.CompletionWithDesc("#5CD0A7", "💚Green"),
+	cobra.CompletionWithDesc("#9BECEC", "🩵Cyan"),
+	cobra.CompletionWithDesc("#4AA6EF", "💙Blue"),
+	cobra.CompletionWithDesc("#CF66F6", "💜Purple"),
+	cobra.CompletionWithDesc("#EC70A5", "💖Pink"),
 	cobra.CompletionWithDesc("#FDF8DC", "🤍White"),
 }
 

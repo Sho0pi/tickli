@@ -75,7 +75,7 @@ Can include associated tasks and switch between output formats.`,
 			} else {
 				project, err := TickliClient.GetProject(opts.projectID)
 				if err != nil {
-					return fmt.Errorf("project %s not found", opts.projectID)
+					return errors.Wrap(err, fmt.Sprintf("failed to get project %s", opts.projectID))
 				}
 				switch opts.output {
 				case types.OutputJSON:

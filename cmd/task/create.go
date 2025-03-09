@@ -108,7 +108,7 @@ and tags. At minimum, a title is required unless using interactive mode.`,
 				return errors.Wrap(err, "failed to create task")
 			}
 
-			fmt.Println(t.ID)
+			fmt.Printf("Created task %s\n", t.ID)
 			return nil
 		},
 	}
