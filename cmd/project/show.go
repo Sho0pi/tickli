@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/sho0pi/tickli/internal/api"
+	"github.com/sho0pi/tickli/internal/completion"
 	"github.com/sho0pi/tickli/internal/config"
 	"github.com/sho0pi/tickli/internal/types"
 	"github.com/sho0pi/tickli/internal/utils"
@@ -41,7 +42,8 @@ Can include associated tasks and switch between output formats.`,
   
   # Output in JSON format
   tickli project show -o json`,
-		Args: cobra.MaximumNArgs(1),
+		Args:              cobra.MaximumNArgs(1),
+		ValidArgsFunction: completion.ProjectNames,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				opts.projectID = args[0]
