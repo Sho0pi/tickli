@@ -62,7 +62,7 @@ The selected project becomes the default context for future commands.`,
   # Switch by project ID
   tickli project use -i abc123def456`,
 		Args:              cobra.MaximumNArgs(1),
-		ValidArgsFunction: completion.ProjectNames,
+		ValidArgsFunction: completion.ProjectIDs(),
 		PreRun: func(cmd *cobra.Command, args []string) {
 			if len(args) > 0 {
 				opts.projectID = args[0]

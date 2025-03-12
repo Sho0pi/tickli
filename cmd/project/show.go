@@ -43,7 +43,7 @@ Can include associated tasks and switch between output formats.`,
   # Output in JSON format
   tickli project show -o json`,
 		Args:              cobra.MaximumNArgs(1),
-		ValidArgsFunction: completion.ProjectNames,
+		ValidArgsFunction: completion.ProjectIDs(),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				opts.projectID = args[0]

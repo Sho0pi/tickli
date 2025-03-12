@@ -3,6 +3,7 @@ package task
 import (
 	"github.com/rs/zerolog/log"
 	"github.com/sho0pi/tickli/internal/api"
+	"github.com/sho0pi/tickli/internal/completion"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +26,8 @@ but need to be worked on again.`,
   
   # Reactivate a task in a specific project
   tickli task uncomplete abc123def456 --project-id xyz789`,
-		Args: cobra.ExactArgs(1),
+		Args:              cobra.ExactArgs(1),
+		ValidArgsFunction: completion.TaskIDs(projectID),
 		PreRun: func(cmd *cobra.Command, args []string) {
 			opts.projectID = projectID
 			opts.taskID = args[0]

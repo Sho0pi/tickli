@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/sho0pi/tickli/internal/api"
+	"github.com/sho0pi/tickli/internal/completion"
 	"github.com/spf13/cobra"
 )
 
@@ -31,7 +32,8 @@ the deletion unless the --force flag is used.`,
   
   # Delete from specific project
   tickli task delete abc123def456 --project-id xyz789`,
-		Args: cobra.ExactArgs(1),
+		Args:              cobra.ExactArgs(1),
+		ValidArgsFunction: completion.TaskIDs(projectID),
 		PreRun: func(cmd *cobra.Command, args []string) {
 			opts.projectID = projectID
 			opts.taskID = args[0]

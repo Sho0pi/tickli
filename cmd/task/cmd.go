@@ -62,5 +62,5 @@ specify a different project with the --project-id flag.`,
 func RegisterProjectOverride(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVarP(&projectID, "project-id", "P", "", "select another project")
 
-	_ = cmd.RegisterFlagCompletionFunc("project-id", completion.ProjectNames)
+	_ = cmd.RegisterFlagCompletionFunc("project-id", completion.ProjectIDs())
 }

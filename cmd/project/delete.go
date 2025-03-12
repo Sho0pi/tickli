@@ -28,7 +28,7 @@ the deletion unless the --force flag is used.`,
   # Force delete without confirmation
   tickli project delete abc123def456 --force`,
 		Args:              cobra.ExactArgs(1),
-		ValidArgsFunction: completion.ProjectNames,
+		ValidArgsFunction: completion.ProjectIDs(),
 		PreRun: func(cmd *cobra.Command, args []string) {
 			opts.projectID = args[0]
 		},

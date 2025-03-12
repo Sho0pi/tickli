@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/sho0pi/tickli/internal/api"
+	"github.com/sho0pi/tickli/internal/completion"
 	"github.com/sho0pi/tickli/internal/types"
 	"github.com/sho0pi/tickli/internal/types/project"
 	"github.com/sho0pi/tickli/internal/types/task"
@@ -57,7 +58,8 @@ This command allows modifying title, content, priority, dates, and more.`,
   
   # Update interactively
   tickli task update abc123def456 -i`,
-		Args: cobra.ExactArgs(1),
+		Args:              cobra.ExactArgs(1),
+		ValidArgsFunction: completion.TaskIDs(projectID),
 		PreRun: func(cmd *cobra.Command, args []string) {
 			opts.projectID = projectID
 			opts.taskID = args[0]

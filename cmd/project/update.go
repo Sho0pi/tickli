@@ -37,7 +37,7 @@ Changes only the properties you specify - others remain unchanged.`,
   # Update interactively
   tickli project update abc123def456 -i`,
 		Args:              cobra.ExactArgs(1),
-		ValidArgsFunction: completion.ProjectNames,
+		ValidArgsFunction: completion.ProjectIDs(),
 		PreRun: func(cmd *cobra.Command, args []string) {
 			opts.projectID = args[0]
 		},

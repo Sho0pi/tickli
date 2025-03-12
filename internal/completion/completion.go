@@ -21,17 +21,49 @@ func loadClient() (*api.Client, error) {
 	return client, nil
 }
 
-func ProjectNames(cmd *cobra.Command, args []string, toComplete string) ([]cobra.Completion, cobra.ShellCompDirective) {
-	client, err := loadClient()
-	if err != nil {
-		return nil, cobra.ShellCompDirectiveNoFileComp
+func ProjectIDs() cobra.CompletionFunc {
+	return func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		client, err := loadClient()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+		projects, err := client.ListProjects()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+		return ProjectCompletions(projects, toComplete), cobra.ShellCompDirectiveNoFileComp
 	}
-	projects, err := client.ListProjects()
-	if err != nil {
-		return nil, cobra.ShellCompDirectiveNoFileComp
-	}
-	return ProjectCompletions(projects, toComplete), cobra.ShellCompDirectiveNoFileComp
+}
 
+func TaskIDs(projectID string) cobra.CompletionFunc {
+	return func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		client, err := loadClient()
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+		if projectID == "" {
+			cfg, err := config.Load()
+			if err != nil {
+				return nil, cobra.ShellCompDirectiveNoFileComp
+			}
+			projectID = cfg.DefaultProjectID
+		}
+
+		tasks, err := client.ListTasks(projectID)
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		}
+
+		return TaskCompletions(tasks), cobra.ShellCompDirectiveNoFileComp
+	}
+}
+
+func TaskCompletions(tasks []types.Task) []cobra.Completion {
+	var completions []cobra.Completion
+	for _, task := range tasks {
+		completions = append(completions, cobra.CompletionWithDesc(task.ID, task.Title))
+	}
+	return completions
 }
 
 func ProjectCompletions(projects []types.Project, toComplete string) []cobra.Completion {
