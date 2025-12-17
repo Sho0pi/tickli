@@ -62,7 +62,7 @@ tickli task complete <task-id>
 | `tickli init`          | Set up authentication with TickTick |
 | `tickli project list`  | Show all your projects              |
 | `tickli project use`   | Switch active project context       |
-| `tickli add`           | Quickly add a new task              |
+| `tickli task add`           | Quickly add a new task              |
 | `tickli task list`     | List tasks in current project       |
 | `tickli task show`     | View task details                   |
 | `tickli task complete` | Mark a task as complete             |
