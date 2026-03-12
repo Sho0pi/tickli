@@ -1,13 +1,17 @@
 package cmd
 
 import (
+	"bufio"
 	"fmt"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/adrg/xdg"
 	"github.com/joho/godotenv"
 	"github.com/pkg/browser"
 	"github.com/pkg/errors"
-	"net/http"
-	"os"
-
 	"github.com/rs/zerolog/log"
 	"github.com/sho0pi/tickli/internal/api"
 	"github.com/sho0pi/tickli/internal/config"
@@ -73,16 +77,41 @@ This will open your browser for authentication and store the access token secure
 }
 
 func initTickli() (string, error) {
-	if err := godotenv.Load(); err == nil {
-		log.Info().Msg("Loading TickTick credentials from .env")
-
-		clientID = os.Getenv("TICKTICK_CLIENT_ID")
-		clientSecret = os.Getenv("TICKTICK_CLIENT_SECRET")
+	envPath := filepath.Join(xdg.ConfigHome, "tickli", ".env")
+	if err := godotenv.Load(envPath); err == nil {
+		log.Info().Msgf("Loading TickTick credentials from %s", envPath)
+	}
+	if id := os.Getenv("TICKTICK_CLIENT_ID"); id != "" {
+		clientID = id
+	}
+	if secret := os.Getenv("TICKTICK_CLIENT_SECRET"); secret != "" {
+		clientSecret = secret
 	}
 
-	// Verify credentials are available
+	// Prompt for missing credentials
+	reader := bufio.NewReader(os.Stdin)
+	if clientID == "" {
+		fmt.Print("Enter TickTick Client ID: ")
+		input, _ := reader.ReadString('\n')
+		clientID = strings.TrimSpace(input)
+	}
+	if clientSecret == "" {
+		fmt.Print("Enter TickTick Client Secret: ")
+		input, _ := reader.ReadString('\n')
+		clientSecret = strings.TrimSpace(input)
+	}
+
 	if clientID == "" || clientSecret == "" {
-		return "", fmt.Errorf("missing TickTick credentials. Please provide them via environment variables or build flags")
+		return "", fmt.Errorf("client ID and client secret are required")
+	}
+
+	// Save credentials for future use
+	if err := os.MkdirAll(filepath.Dir(envPath), 0755); err != nil {
+		log.Warn().Err(err).Msg("Failed to create config directory")
+	} else if err := os.WriteFile(envPath, []byte(fmt.Sprintf("TICKTICK_CLIENT_ID=%s\nTICKTICK_CLIENT_SECRET=%s\n", clientID, clientSecret)), 0600); err != nil {
+		log.Warn().Err(err).Msg("Failed to save credentials")
+	} else {
+		log.Info().Msgf("Credentials saved to %s", envPath)
 	}
 
 	// Start OAuth flow
