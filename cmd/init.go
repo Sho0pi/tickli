@@ -73,12 +73,10 @@ This will open your browser for authentication and store the access token secure
 }
 
 func initTickli() (string, error) {
-	if err := godotenv.Load(); err == nil {
-		log.Info().Msg("Loading TickTick credentials from .env")
+	godotenv.Load()
 
-		clientID = os.Getenv("TICKTICK_CLIENT_ID")
-		clientSecret = os.Getenv("TICKTICK_CLIENT_SECRET")
-	}
+	clientID = os.Getenv("TICKTICK_CLIENT_ID")
+	clientSecret = os.Getenv("TICKTICK_CLIENT_SECRET")
 
 	// Verify credentials are available
 	if clientID == "" || clientSecret == "" {
