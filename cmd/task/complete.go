@@ -6,12 +6,14 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sho0pi/tickli/internal/api"
 	"github.com/sho0pi/tickli/internal/completion"
+	"github.com/sho0pi/tickli/internal/utils"
 	"github.com/spf13/cobra"
 )
 
 type completeOptions struct {
 	projectID string
 	taskID    string
+	json      bool
 }
 
 func newCompleteCmd(client *api.Client) *cobra.Command {
@@ -40,10 +42,14 @@ but will no longer appear in default listings unless using the --all flag.`,
 				return errors.Wrap(err, "failed to complete task")
 			}
 
+			if opts.json {
+				return utils.PrintJSON(map[string]any{"id": opts.taskID, "projectId": opts.projectID, "completed": true})
+			}
 			fmt.Printf("%s Task %s completed\n", color.Green.Sprint("☑"), opts.taskID)
 			return nil
 		},
 	}
 
+	utils.AddJSONFlag(cmd, &opts.json)
 	return cmd
 }

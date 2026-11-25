@@ -36,6 +36,8 @@ type updateOptions struct {
 
 	// interactive indicates if you should prompt to get title and content
 	interactive bool
+
+	json bool
 }
 
 func newUpdateCommand(client *api.Client) *cobra.Command {
@@ -118,6 +120,9 @@ This command allows modifying title, content, priority, dates, and more.`,
 			if err != nil {
 				return errors.Wrap(err, fmt.Sprintf("failed to update task %s", opts.taskID))
 			}
+			if opts.json {
+				return utils.PrintJSON(t)
+			}
 			fmt.Printf("Task %s updated successfully\n", t.ID)
 			fmt.Println(utils.GetTaskDescription(*t, project.DefaultColor))
 			return nil
@@ -142,6 +147,7 @@ This command allows modifying title, content, priority, dates, and more.`,
 	cmd.Flags().StringVar(&opts.repeat, "repeat", "", "New recurring rule (e.g., 'daily', 'weekly on monday')")
 	cmd.Flags().Var(&opts.priority, "priority", "Change task importance: none, low, medium, high")
 	_ = cmd.RegisterFlagCompletionFunc("priority", task.PriorityCompletionFunc)
+	utils.AddJSONFlag(cmd, &opts.json)
 	cmd.Flags().BoolVarP(&opts.interactive, "interactive", "i", false, "Update task by answering prompts")
 
 	return cmd

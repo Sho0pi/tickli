@@ -1,9 +1,7 @@
 package task
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 	"github.com/sho0pi/tickli/internal/api"
 	"github.com/sho0pi/tickli/internal/completion"
@@ -17,6 +15,7 @@ type showOptions struct {
 	projectID string
 	taskID    string
 	output    types.OutputFormat
+	json      bool
 }
 
 func newShowCommand(client *api.Client) *cobra.Command {
@@ -44,6 +43,9 @@ You can choose between human-readable output or machine-readable JSON.`,
 		PreRun: func(cmd *cobra.Command, args []string) {
 			opts.projectID = projectID
 			opts.taskID = args[0]
+			if opts.json {
+				opts.output = types.OutputJSON
+			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			task, err := client.GetTask(opts.projectID, opts.taskID)
@@ -57,18 +59,17 @@ You can choose between human-readable output or machine-readable JSON.`,
 			switch opts.output {
 			case types.OutputSimple:
 				fmt.Println(utils.GetTaskDescription(*task, project.DefaultColor))
+				fmt.Println(task.ID)
 			case types.OutputJSON:
-				jsonData, err := json.MarshalIndent(task, "", "  ")
-				if err != nil {
-					return errors.Wrap(err, "failed to marshal output")
-				}
-				fmt.Println(string(jsonData))
+				return utils.PrintJSON(task)
 			}
-			fmt.Println(task.ID)
 			return nil
 		},
 	}
 
 	cmd.Flags().VarP(&opts.output, "output", "o", "Display format: simple (human-readable) or json (machine-readable)")
+	_ = cmd.RegisterFlagCompletionFunc("output", types.OutputFormatCompletionFunc)
+	utils.AddJSONFlag(cmd, &opts.json)
+	cmd.MarkFlagsMutuallyExclusive("json", "output")
 	return cmd
 }

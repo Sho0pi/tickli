@@ -12,6 +12,7 @@ import (
 
 type listOptions struct {
 	filter string
+	json   bool
 }
 
 func filterProjectByName(projects []types.Project, name string) ([]types.Project, error) {
@@ -54,6 +55,10 @@ then displays a fuzzy-search selector to choose a project.`,
 				return err
 			}
 
+			if opts.json {
+				return utils.PrintJSON(projects)
+			}
+
 			project, err := utils.FuzzySelectProject(projects, "")
 			if err != nil {
 				return errors.Wrap(err, "failed to select project")
@@ -65,6 +70,7 @@ then displays a fuzzy-search selector to choose a project.`,
 	}
 
 	cmd.Flags().StringVarP(&opts.filter, "filter", "f", "", "Only show projects with names containing the provided text")
+	utils.AddJSONFlag(cmd, &opts.json)
 
 	return cmd
 }

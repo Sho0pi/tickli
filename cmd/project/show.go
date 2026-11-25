@@ -1,7 +1,6 @@
 package project
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/pkg/errors"
 	"github.com/sho0pi/tickli/internal/api"
@@ -16,6 +15,7 @@ type showOptions struct {
 	projectID string
 	withTasks bool
 	output    types.OutputFormat
+	json      bool
 }
 
 func newShowCommand(client *api.Client) *cobra.Command {
@@ -45,6 +45,9 @@ Can include associated tasks and switch between output formats.`,
 		Args:              cobra.MaximumNArgs(1),
 		ValidArgsFunction: completion.ProjectIDs(),
 		PreRunE: func(cmd *cobra.Command, args []string) error {
+			if opts.json {
+				opts.output = types.OutputJSON
+			}
 			if len(args) > 0 {
 				opts.projectID = args[0]
 			} else {
@@ -69,11 +72,7 @@ Can include associated tasks and switch between output formats.`,
 						fmt.Println(utils.GetTaskDescription(task, projectData.Project.Color))
 					}
 				case types.OutputJSON:
-					jsonData, err := json.MarshalIndent(projectData, "", "  ")
-					if err != nil {
-						return errors.Wrap(err, "failed to marshal output")
-					}
-					fmt.Println(string(jsonData))
+					return utils.PrintJSON(projectData)
 				}
 			} else {
 				project, err := client.GetProject(opts.projectID)
@@ -82,11 +81,7 @@ Can include associated tasks and switch between output formats.`,
 				}
 				switch opts.output {
 				case types.OutputJSON:
-					jsonData, err := json.MarshalIndent(project, "", "  ")
-					if err != nil {
-						return errors.Wrap(err, "failed to marshal output")
-					}
-					fmt.Println(string(jsonData))
+					return utils.PrintJSON(project)
 				case types.OutputSimple:
 					fmt.Println(utils.GetProjectDescription(project))
 				}
@@ -98,5 +93,7 @@ Can include associated tasks and switch between output formats.`,
 	cmd.Flags().BoolVar(&opts.withTasks, "with-tasks", false, "Include all tasks belonging to this project")
 	cmd.Flags().VarP(&opts.output, "output", "o", "Format for displaying results: simple (human-readable) or json (machine-readable)")
 	_ = cmd.RegisterFlagCompletionFunc("output", types.OutputFormatCompletionFunc)
+	utils.AddJSONFlag(cmd, &opts.json)
+	cmd.MarkFlagsMutuallyExclusive("json", "output")
 	return cmd
 }

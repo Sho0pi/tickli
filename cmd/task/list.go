@@ -20,6 +20,7 @@ type listOptions struct {
 	dueDate   string
 	tag       string
 	projectID string
+	json      bool
 }
 
 func fetchProjectColor(client *api.Client, projectID string) project.Color {
@@ -140,6 +141,18 @@ tags, and due date. Results are displayed in an interactive selector.`,
 			opts.projectID = projectID
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if opts.json {
+				tasks, err := client.ListTasks(projectID)
+				if err != nil {
+					return err
+				}
+				filtered := filterTasks(tasks, opts)
+				if filtered == nil {
+					filtered = []types.Task{}
+				}
+				return utils.PrintJSON(filtered)
+			}
+
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
@@ -184,6 +197,7 @@ tags, and due date. Results are displayed in an interactive selector.`,
 	cmd.Flags().VarP(&opts.priority, "priority", "p", "Only show tasks with this priority level or higher")
 	_ = cmd.RegisterFlagCompletionFunc("priority", task.PriorityCompletionFunc)
 	cmd.Flags().StringVar(&opts.dueDate, "due", "", "Filter by due date (today, tomorrow, this-week, overdue)")
+	utils.AddJSONFlag(cmd, &opts.json)
 	cmd.Flags().BoolVarP(&opts.verbose, "verbose", "v", false, "Show more details for each task in the list")
 
 	return cmd

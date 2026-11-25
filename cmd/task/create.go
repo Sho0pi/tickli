@@ -33,6 +33,7 @@ type createOptions struct {
 	interactive bool
 
 	projectID string
+	json      bool
 }
 
 func newCreateCommand(client *api.Client) *cobra.Command {
@@ -109,6 +110,9 @@ and tags. At minimum, a title is required unless using interactive mode.`,
 				return errors.Wrap(err, "failed to create task")
 			}
 
+			if opts.json {
+				return utils.PrintJSON(t)
+			}
 			fmt.Printf("Created task %s\n", t.ID)
 			return nil
 		},
@@ -134,6 +138,7 @@ and tags. At minimum, a title is required unless using interactive mode.`,
 	cmd.Flags().StringVar(&opts.repeat, "repeat", "", "Recurring rule (e.g., 'daily', 'weekly on monday')")
 	cmd.Flags().VarP(&opts.priority, "priority", "p", "Task importance: none, low, medium, high (default: none)")
 	_ = cmd.RegisterFlagCompletionFunc("priority", task.PriorityCompletionFunc)
+	utils.AddJSONFlag(cmd, &opts.json)
 	cmd.Flags().BoolVarP(&opts.interactive, "interactive", "i", false, "Create task by answering prompts")
 
 	return cmd

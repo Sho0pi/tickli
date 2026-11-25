@@ -48,7 +48,7 @@ func Execute() {
 	})
 
 	if err := cmd.Execute(); err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		log.Fatal().Err(err).Msg("Failed to execute command")
 	}
 }
