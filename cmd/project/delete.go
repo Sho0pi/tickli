@@ -5,12 +5,14 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sho0pi/tickli/internal/api"
 	"github.com/sho0pi/tickli/internal/completion"
+	"github.com/sho0pi/tickli/internal/utils"
 	"github.com/spf13/cobra"
 )
 
 type deleteOptions struct {
 	projectID string
 	force     bool
+	json      bool
 }
 
 func newDeleteCommand(client *api.Client) *cobra.Command {
@@ -33,6 +35,9 @@ the deletion unless the --force flag is used.`,
 			opts.projectID = args[0]
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if opts.json && !opts.force {
+				return errors.New("--json requires --force (no confirmation prompt in JSON mode)")
+			}
 			if !opts.force {
 				var confirm string
 				fmt.Printf("Are you sure you want to delete the project %s? (y/N): ", opts.projectID)
@@ -48,6 +53,9 @@ the deletion unless the --force flag is used.`,
 				return errors.Wrap(err, fmt.Sprintf("failed to delete project %s", opts.projectID))
 			}
 
+			if opts.json {
+				return utils.PrintJSON(map[string]any{"id": opts.projectID, "deleted": true})
+			}
 			fmt.Println("Deleting project:", args[0])
 
 			return nil
@@ -55,6 +63,7 @@ the deletion unless the --force flag is used.`,
 	}
 
 	cmd.Flags().BoolVarP(&opts.force, "force", "f", false, "Skip confirmation prompt and delete immediately")
+	utils.AddJSONFlag(cmd, &opts.json)
 
 	return cmd
 }

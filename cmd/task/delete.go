@@ -5,6 +5,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sho0pi/tickli/internal/api"
 	"github.com/sho0pi/tickli/internal/completion"
+	"github.com/sho0pi/tickli/internal/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -12,6 +13,7 @@ type deleteOptions struct {
 	projectID string
 	taskID    string
 	force     bool
+	json      bool
 }
 
 func newDeleteCommand(client *api.Client) *cobra.Command {
@@ -39,6 +41,9 @@ the deletion unless the --force flag is used.`,
 			opts.taskID = args[0]
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if opts.json && !opts.force {
+				return errors.New("--json requires --force (no confirmation prompt in JSON mode)")
+			}
 			if !opts.force {
 				var confirm string
 				fmt.Printf("Are you sure you want to delete the task %s? (y/N): ", opts.taskID)
@@ -54,6 +59,9 @@ the deletion unless the --force flag is used.`,
 				return errors.Wrap(err, fmt.Sprintf("failed to delete task %s", opts.taskID))
 			}
 
+			if opts.json {
+				return utils.PrintJSON(map[string]any{"id": opts.taskID, "projectId": opts.projectID, "deleted": true})
+			}
 			fmt.Printf("Task %s deleted\n", opts.taskID)
 
 			return nil
@@ -61,6 +69,7 @@ the deletion unless the --force flag is used.`,
 	}
 
 	cmd.Flags().BoolVarP(&opts.force, "force", "f", false, "Skip confirmation prompt and delete immediately")
+	utils.AddJSONFlag(cmd, &opts.json)
 
 	return cmd
 }

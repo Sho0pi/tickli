@@ -38,6 +38,7 @@ func findProjectsByName(projects []*types.Project, name string) ([]*types.Projec
 
 type useProjectOptions struct {
 	projectID string
+	json      bool
 }
 
 func newUseProjectCmd(client *api.Client) *cobra.Command {
@@ -76,6 +77,9 @@ The selected project becomes the default context for future commands.`,
 
 			var selectedProject types.Project
 
+			if opts.json && opts.projectID == "" {
+				return errors.New("--json requires a project ID argument (no interactive selection in JSON mode)")
+			}
 			if opts.projectID != "" {
 				project, err := findProjectByID(projects, opts.projectID)
 				if err != nil {
@@ -103,9 +107,13 @@ The selected project becomes the default context for future commands.`,
 				Str("project_id", cfg.DefaultProjectID).
 				Str("project_name", selectedProject.Name).
 				Msg("Switched to project")
+			if opts.json {
+				return utils.PrintJSON(selectedProject)
+			}
 			return nil
 		},
 	}
 
+	utils.AddJSONFlag(cmd, &opts.json)
 	return cmd
 }

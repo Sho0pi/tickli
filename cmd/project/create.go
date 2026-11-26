@@ -16,6 +16,7 @@ type createProjectOptions struct {
 	viewMode    project.ViewMode
 	kind        project.Kind
 	interactive bool
+	json        bool
 }
 
 func newCreateProjectCommand(client *api.Client) *cobra.Command {
@@ -52,6 +53,9 @@ supports both direct parameter input and interactive mode.`,
 				return errors.Wrap(err, fmt.Sprintf("failed to create project %s", p.Name))
 			}
 
+			if opts.json {
+				return utils.PrintJSON(p)
+			}
 			fmt.Println(utils.GetProjectDescription(*p))
 			fmt.Println(p.ID)
 			return nil
@@ -65,6 +69,7 @@ supports both direct parameter input and interactive mode.`,
 	_ = cmd.RegisterFlagCompletionFunc("view-mode", project.ViewModeCompletionFunc)
 	cmd.Flags().Var(&opts.kind, "kind", "Project type: TASK for action items or NOTE for information (default: TASK)")
 	_ = cmd.RegisterFlagCompletionFunc("kind", project.KindCompletionFunc)
+	utils.AddJSONFlag(cmd, &opts.json)
 	cmd.Flags().BoolVarP(&opts.interactive, "interactive", "i", false, "Create project by answering prompts instead of using flags")
 
 	return cmd

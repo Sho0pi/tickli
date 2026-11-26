@@ -17,6 +17,7 @@ type updateProjectOptions struct {
 	viewMode    project.ViewMode
 	kind        project.Kind
 	interactive bool
+	json        bool
 }
 
 func newUpdateProjectCommand(client *api.Client) *cobra.Command {
@@ -62,6 +63,9 @@ Changes only the properties you specify - others remain unchanged.`,
 			if err != nil {
 				return errors.Wrap(err, fmt.Sprintf("failed to update project %s", opts.projectID))
 			}
+			if opts.json {
+				return utils.PrintJSON(p)
+			}
 			fmt.Printf("Project %s updated successfully\n", p.ID)
 			fmt.Println(utils.GetProjectDescription(p))
 			return nil
@@ -75,6 +79,7 @@ Changes only the properties you specify - others remain unchanged.`,
 	_ = cmd.RegisterFlagCompletionFunc("view-mode", project.ViewModeCompletionFunc)
 	cmd.Flags().Var(&opts.kind, "kind", "Change project type: TASK or NOTE")
 	_ = cmd.RegisterFlagCompletionFunc("kind", project.KindCompletionFunc)
+	utils.AddJSONFlag(cmd, &opts.json)
 	cmd.Flags().BoolVarP(&opts.interactive, "interactive", "i", false, "Update project by answering prompts instead of using flags")
 
 	return cmd
